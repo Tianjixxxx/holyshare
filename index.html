@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Boost</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="icon" href="https://i.imgur.com/zi15QL3.png" type="image/png">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF2C55',
+                        'primary-darker': '#E01A42',
+                        'text-main': '#f0f0f0',
+                        'text-muted': '#a0a0a0',
+                        'bg-container-light': '#ffffff',
+                        'bg-container-dark': '#121212',
+                        'bg-card-light': '#f9fafb',
+                        'bg-card-dark': 'rgba(31, 41, 66, 0.8)',
+                        'border-color-light': '#e5e7eb',
+                        'border-color-dark': 'rgba(255, 44, 85, 0.15)',
+                        'input-bg-light': '#ffffff',
+                        'input-bg-dark': 'rgba(40, 50, 80, 0.7)',
+                        'input-border-light': '#d1d5db',
+                        'input-border-dark': 'rgba(255, 44, 85, 0.3)',
+                        'nav-bg-light': 'rgba(255, 255, 255, 0.9)',
+                        'nav-bg-dark': 'rgba(18, 18, 18, 0.9)',
+                        'nav-border-light': '#e5e7eb',
+                        'nav-border-dark': '#3f3f3f',
+                        'modal-bg-light': '#ffffff',
+                        'modal-bg-dark': '#262626',
+                        'success-bg-light': '#dcfce7',
+                        'success-text-light': '#166534',
+                        'success-bg-dark': '#166534',
+                        'success-text-dark': '#dcfce7',
+                        'error-bg-light': '#fee2e2',
+                        'error-text-light': '#991b1b',
+                        'error-bg-dark': '#991b1b',
+                        'error-text-dark': '#fee2e2',
+                    },
+                     boxShadow: {
+                        'primary-glow': '0 0 15px rgba(255, 44, 85, 0.3)',
+                        'card': '0 5px 20px rgba(0, 0, 0, 0.2)',
+                    }
+                },
+            },
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #FF2C55; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff1641; }
+
+        .dark ::-webkit-scrollbar-track { background: #2d3748; }
+        .dark ::-webkit-scrollbar-thumb { background: #FF2C55; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #E01A42; }
+
+        .content-section { display: none; animation: fadeIn 0.4s ease-out; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: inherit;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        .section-title::after {
+            content: ''; display: block; width: 40px; height: 3px;
+            background: theme('colors.primary'); margin: 0.5rem auto 0; border-radius: 2px;
+            box-shadow: theme('boxShadow.primary-glow');
+        }
+         .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); z-index: 1050;
+            justify-content: center; align-items: center; padding: 1rem;
+        }
+        .modal-content {
+            padding: 1.5rem; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); text-align: center;
+            min-width: 300px; max-width: 90%; border: 1px solid transparent;
+        }
+        .light .modal-content { background-color: theme('colors.modal-bg-light'); color: #333; border-color: #eee; }
+        .dark .modal-content { background-color: theme('colors.modal-bg-dark'); color: theme('colors.text-main'); border-color: #3f3f3f; }
+        .modal-content.success { border-left: 4px solid #00BA88; }
+        .light .modal-content.success { background-color: theme('colors.success-bg-light'); color: theme('colors.success-text-light'); }
+        .dark .modal-content.success { background-color: theme('colors.success-bg-dark'); color: theme('colors.success-text-dark'); }
+        .modal-content.error { border-left: 4px solid theme('colors.primary'); }
+        .light .modal-content.error { background-color: theme('colors.error-bg-light'); color: theme('colors.error-text-light'); }
+        .dark .modal-content.error { background-color: theme('colors.error-bg-dark'); color: theme('colors.error-text-dark'); }
+
+        .tutorial-video {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.75rem;
+            background-color: #000;
+            border: 1px solid theme('colors.border-color-light');
+            box-shadow: 0 4px 15px rgba(0,0,0, 0.1);
+        }
+        .dark .tutorial-video {
+             border-color: theme('colors.border-color-dark');
+             box-shadow: theme('boxShadow.card');
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-bg-container-dark text-gray-800 dark:text-text-main font-poppins">
+    <div class="max-w-md mx-auto min-h-screen pb-20 bg-bg-container-light dark:bg-bg-container-dark shadow-lg flex flex-col">
+
+        <header
+            class="p-4 border-b bg-bg-container-light dark:bg-bg-container-dark border-border-color-light dark:border-nav-border-dark sticky top-0 z-40 backdrop-blur-lg bg-opacity-90 dark:bg-opacity-90">
+            <div class="flex items-center justify-between">
+                 <h1 class="text-xl font-semibold text-inherit flex items-center gap-2">
+                    <img src="https://i.imgur.com/zi15QL3.png" alt="Logo" class="w-6 h-6">
+                    Share Boost
+                </h1>
+                <button class="p-2 text-text-muted hover:text-primary rounded-full transition-colors" id="themeToggle">
+                    <i></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-grow overflow-y-auto p-4">
+            <div class="content-sections">
+                <section id="home-section" class="content-section active">
+                    <form id="share-boost-form" class="space-y-5">
+                         <div>
+                            <label class="text-sm text-gray-600 dark:text-text-muted mb-1.5 block flex items-center gap-1.5">
+                                <i data-lucide="cookie" class="w-4 h-4 text-primary"></i> Appstate:
+                            </label>
+                            <textarea id="cookies" name="cookie" rows="3"
+                                class="w-full p-3 rounded-lg border bg-input-bg-light dark:bg-input-bg-dark border-input-border-light dark:border-input-border-dark text-gray-800 dark:text-text-main placeholder-gray-400 dark:placeholder-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all text-sm"
+                                placeholder="Paste your Facebook appstate JSON here..." required></textarea>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 dark:text-text-muted mb-1.5 block flex items-center gap-1.5">
+                                <i data-lucide="link" class="w-4 h-4 text-primary"></i> Post Link:
+                            </label>
+                            <input type="url" id="urls" name="url"
+                                class="w-full p-3 rounded-lg border bg-input-bg-light dark:bg-input-bg-dark border-input-border-light dark:border-input-border-dark text-gray-800 dark:text-text-main placeholder-gray-400 dark:placeholder-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all text-sm"
+                                placeholder="https://www.facebook.com/.........." required>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-sm text-gray-600 dark:text-text-muted mb-1.5 block flex items-center gap-1.5">
+                                    <i data-lucide="hash" class="w-4 h-4 text-primary"></i> Share Limit:
+                                </label>
+                                <input type="number" id="amounts" name="amount"
+                                     class="w-full p-3 rounded-lg border bg-input-bg-light dark:bg-input-bg-dark border-input-border-light dark:border-input-border-dark text-gray-800 dark:text-text-main placeholder-gray-400 dark:placeholder-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all text-sm"
+                                    placeholder="e.g., 100" min="1" required>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600 dark:text-text-muted mb-1.5 block flex items-center gap-1.5">
+                                    <i data-lucide="timer" class="w-4 h-4 text-primary"></i> Delay (sec):
+                                </label>
+                                <input type="number" id="intervals" name="interval"
+                                     class="w-full p-3 rounded-lg border bg-input-bg-light dark:bg-input-bg-dark border-input-border-light dark:border-input-border-dark text-gray-800 dark:text-text-main placeholder-gray-400 dark:placeholder-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all text-sm"
+                                    placeholder="e.g., 10" min="1" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 dark:text-text-muted mb-1.5 block flex items-center gap-1.5">
+                                <i data-lucide="server" class="w-4 h-4 text-primary"></i> Server:
+                            </label>
+                            <select id="server" name="server"
+                                class="w-full p-3 rounded-lg border bg-input-bg-light dark:bg-input-bg-dark border-input-border-light dark:border-input-border-dark text-gray-800 dark:text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all text-sm appearance-none bg-no-repeat bg-right-3"
+                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\' fill=\'%23a0a0a0\'%3E%3Cpath fill-rule=\'evenodd\' d=\'M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z\' clip-rule=\'evenodd\' /%3E%3C/svg%3E'); background-size: 1.2em 1.2em;">
+                                <option value="server1">Server 1</option>
+                                <option value="server2">Server 2</option>
+                                <option value="server3">Server 3</option>
+                            </select>
+                        </div>
+                         <button type="submit" id="submit-button"
+                            class="w-full bg-primary text-white py-3 rounded-lg font-semibold text-base hover:bg-primary-darker transition-colors duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg shadow-primary/30"
+                            disabled>
+                            <i data-lucide="rocket" class="w-5 h-5"></i>
+                            Start Boosting
+                        </button>
+                    </form>
+                </section>
+
+                <section id="tutorial-section" class="content-section">
+                     <h2 class="section-title">Video Tutorial</h2>
+                     <div class="p-2 bg-bg-card-light dark:bg-bg-card-dark rounded-xl border border-border-color-light dark:border-border-color-dark shadow-card">
+                         <video class="tutorial-video" controls preload="metadata" poster="https://via.placeholder.com/640x360/121212/FF2C55?text=Video+Tutorial+Loading...">
+                             <source src="https://i.imgur.com/UvbU5QK.mp4" type="video/mp4">
+                             Your browser does not support the video tag. Please update your browser.
+                         </video>
+                     </div>
+                     <p class="text-center text-sm text-gray-600 dark:text-text-muted mt-4 px-2">
+                         Watch this video to learn how to get your appstate and use the Share Boost tool correctly.
+                     </p>
+                </section>
+
+                <section id="notifications-section" class="content-section">
+                    <h2 class="section-title">Notifications</h2>
+                    <div id="notifications-list" class="space-y-3">
+                        <div class="flex items-start gap-3 p-3 bg-gray-100 dark:bg-input-bg-dark/70 rounded-lg border border-gray-200 dark:border-border-color-dark/50">
+                            <i data-lucide="info" class="w-5 h-5 text-primary flex-shrink-0 mt-0.5"></i>
+                            <span class="text-sm text-gray-700 dark:text-text-muted">Welcome! Ensure server is active before starting.</span>
+                        </div>
+                         <div class="flex items-start gap-3 p-3 bg-gray-100 dark:bg-input-bg-dark/70 rounded-lg border border-gray-200 dark:border-border-color-dark/50">
+                            <i data-lucide="bell" class="w-5 h-5 text-primary flex-shrink-0 mt-0.5"></i>
+                            <span class="text-sm text-gray-700 dark:text-text-muted">Tutorial section now features a video guide.</span>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-700/50">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-500 dark:text-yellow-400 flex-shrink-0 mt-0.5"></i>
+                            <span class="text-sm text-yellow-800 dark:text-yellow-300">Use responsibly. Avoid excessive sharing to prevent Facebook restrictions.</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <nav
+            class="fixed bottom-0 left-0 right-0 bg-nav-bg-light dark:bg-nav-bg-dark border-t border-nav-border-light dark:border-nav-border-dark max-w-md mx-auto backdrop-blur-lg z-50">
+            <div class="relative">
+                <div class="flex justify-around items-center px-4 py-2">
+                    <a href="#" data-section="home" class="nav-item flex flex-col items-center text-primary dark:text-primary relative p-2">
+                        <i data-lucide="home" class="w-5 h-5"></i>
+                        <span class="text-xs mt-1">Home</span>
+                    </a>
+                    <a href="#" data-section="tutorial" class="nav-item flex flex-col items-center text-gray-500 dark:text-gray-400 relative p-2">
+                        <i data-lucide="play-circle" class="w-5 h-5"></i>
+                        <span class="text-xs mt-1">Tutorial</span>
+                    </a>
+                    <a href="#" data-section="notifications" class="nav-item flex flex-col items-center text-gray-500 dark:text-gray-400 relative p-2">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span class="text-xs mt-1">Notifications</span>
+                    </a>
+                </div>
+                <div class="nav-indicator absolute bottom-0 left-0 h-0.5 bg-primary transition-transform duration-300 ease-out"
+                    style="width: 33.33%"></div>
+            </div>
+        </nav>
+
+        <div id="responseModal" class="modal">
+            <div class="modal-content" id="responseMessage"></div>
+        </div>
+
+    </div>
+
+    <script>
+         const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const themeIcon = themeToggle.querySelector('i');
+
+        const applyTheme = (theme) => {
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                html.classList.remove('light');
+                themeIcon.setAttribute('data-lucide', 'sun');
+            } else {
+                html.classList.add('light');
+                html.classList.remove('dark');
+                themeIcon.setAttribute('data-lucide', 'moon');
+            }
+            lucide.createIcons();
+        }
+
+        const storedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        applyTheme(storedTheme);
+
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.classList.contains('dark') ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        lucide.createIcons();
+
+        const serverUrls = {
+            server1: 'https://server1-u9fw.onrender.com',
+            server2: 'https://server-2-aggj.onrender.com',
+            server3: 'https://server-3-p6lg.onrender.com'
+        };
+        const serverSelect = document.getElementById('server');
+        const submitButton = document.getElementById('submit-button');
+
+        async function checkServerStatus() {
+            let oneServerActive = false;
+            const options = serverSelect.options;
+            const statusPromises = Array.from(options).map(async (option) => {
+                 const serverKey = option.value;
+                 const originalText = option.text.split(' (')[0];
+                 let statusText = '(Checking...)';
+                 let isActive = false;
+                 try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    const response = await fetch(serverUrls[serverKey], { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (response.ok) { statusText = '(Active)'; isActive = true; oneServerActive = true; }
+                    else { statusText = '(Down)'; }
+                 } catch(error) { statusText = error.name === 'AbortError' ? '(Timeout)' : '(Down)'; }
+                 option.textContent = `${originalText} ${statusText}`;
+                 option.disabled = !isActive;
+                 option.style.color = isActive ? '' : (html.classList.contains('dark') ? '#777' : '#aaa');
+                 if (!isActive && serverSelect.value === serverKey) {
+                    const firstActive = Array.from(options).find(opt => !opt.disabled);
+                    if (firstActive) serverSelect.value = firstActive.value;
+                 }
+                 return isActive;
+            });
+
+            await Promise.all(statusPromises);
+
+            submitButton.disabled = !oneServerActive;
+             if (!oneServerActive) {
+                 submitButton.textContent = 'All Servers Down';
+                 submitButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                 submitButton.classList.remove('bg-primary', 'hover:bg-primary-darker');
+                 submitButton.querySelector('i')?.remove();
+             } else {
+                if (!submitButton.querySelector('i')) {
+                     submitButton.innerHTML = '<i data-lucide="rocket" class="w-5 h-5"></i> Start Boosting';
+                     lucide.createIcons();
+                } else {
+                     submitButton.childNodes[submitButton.childNodes.length -1].nodeValue = ' Start Boosting';
+                }
+                 submitButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+                 submitButton.classList.add('bg-primary', 'hover:bg-primary-darker');
+             }
+        }
+
+
+        document.getElementById('share-boost-form').onsubmit = async function (event) {
+            event.preventDefault();
+            const modal = document.getElementById('responseModal');
+            const message = document.getElementById('responseMessage');
+            const url = document.getElementById('urls').value;
+            const amount = parseInt(document.getElementById('amounts').value);
+            const cookie = document.getElementById('cookies').value;
+            const interval = parseInt(document.getElementById('intervals').value);
+            const serverValue = document.getElementById('server').value;
+
+            message.textContent = 'Submitting request... Please wait.';
+            message.className = 'modal-content';
+            modal.style.display = 'flex';
+            submitButton.disabled = true;
+
+            try {
+                const server = serverUrls[serverValue];
+                const response = await fetch(`${server}/api/submit`, {
+                    method: 'POST',
+                    body: JSON.stringify({ cookie: cookie, url: url, amount: amount, interval: interval }),
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: AbortSignal.timeout(15000)
+                });
+                if (!response.ok) { throw new Error(`Server error: ${response.status} ${response.statusText}`); }
+                const data = await response.json();
+                if (data.status === 200 || response.status === 200) {
+                    message.textContent = data.message || 'Submitted successfully! Processing started.';
+                    message.classList.add('success');
+                } else {
+                    message.textContent = `Error: ${data.message || 'Unknown error occurred.'}`;
+                    message.classList.add('error');
+                }
+            } catch (error) {
+                 message.textContent = error.name === 'TimeoutError' ? 'Request timed out. Please try again.' : `Network error or server issue: ${error.message}`;
+                 message.classList.add('error');
+            } finally {
+                submitButton.disabled = !Array.from(serverSelect.options).some(opt => !opt.disabled);
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    message.className = 'modal-content';
+                }, 4000);
+            }
+        };
+
+        const navItems = document.querySelectorAll('.nav-item');
+        const navIndicator = document.querySelector('.nav-indicator');
+        const contentSections = document.querySelectorAll('.content-section');
+        const navItemCount = navItems.length;
+        navIndicator.style.width = `${100 / navItemCount}%`;
+
+        navItems.forEach((item, index) => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                const currentActive = document.querySelector('.nav-item.text-primary');
+                if (currentActive && currentActive !== this) {
+                     currentActive.classList.remove('text-primary', 'dark:text-primary');
+                     currentActive.classList.add('text-gray-500', 'dark:text-gray-400');
+                }
+                if(!this.classList.contains('text-primary')){
+                    this.classList.remove('text-gray-500', 'dark:text-gray-400');
+                    this.classList.add('text-primary', 'dark:text-primary');
+                }
+
+                contentSections.forEach(section => section.classList.remove('active'));
+                document.getElementById(`${this.dataset.section}-section`).classList.add('active');
+
+                navIndicator.style.transform = `translateX(${index * 100}%)`;
+            });
+
+            if (item.classList.contains('text-primary')) {
+                 document.getElementById(`${item.dataset.section}-section`).classList.add('active');
+                 navIndicator.style.transform = `translateX(${index * 100}%)`;
+            }
+        });
+
+
+        window.onload = () => {
+            checkServerStatus();
+            setInterval(checkServerStatus, 60000);
+        }
+    </script>
+</body>
+                              </html>
