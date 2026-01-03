@@ -1,25 +1,24 @@
 const express = require("express");
 const axios = require("axios");
 const qs = require("querystring");
-const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-/* ===== USER AGENTS ===== */
+// serve index.html ONLY (no public folder)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
 const uaList = [
   "Mozilla/5.0 (Linux; Android 10) Chrome/105.0 Mobile Safari/537.36",
   "Mozilla/5.0 (Linux; Android 11) Chrome/87.0 Mobile Safari/537.36",
   "Mozilla/5.0 (Linux; Android 11) Chrome/106.0 Mobile Safari/537.36"
 ];
 
-/* ===== SERVE INDEX.HTML ===== */
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-/* ===== HELPERS ===== */
+// extract EAAG token
 async function extractToken(cookie, ua) {
   try {
     const res = await axios.get(
@@ -51,38 +50,33 @@ function parseCookiesToObject(cookie) {
   return out;
 }
 
-async function sharePost(token, cookiesObj, link, n, start, ua) {
-  try {
-    const body = qs.stringify({
-      link,
-      access_token: token
-    });
+async function sharePost(token, cookiesObj, link, ua) {
+  const body = qs.stringify({
+    link,
+    access_token: token
+  });
 
-    const res = await axios.post(
-      "https://graph.facebook.com/v18.0/me/feed",
-      body,
-      {
-        headers: {
-          "User-Agent": ua,
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Cookie": Object.entries(cookiesObj)
-            .map(x => x.join("="))
-            .join("; ")
-        }
-      }
-    );
+  const res = await axios.post(
+    "https://graph.facebook.com/v18.0/me/feed",
+    body,
+    {
+      headers: {
+        "User-Agent": ua,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cookie": Object.entries(cookiesObj)
+          .map(x => x.join("="))
+          .join("; ")
+      },
+      timeout: 15000
+    }
+  );
 
-    return res.data.id
-      ? { n, status: "success", time: Math.floor((Date.now() - start) / 1000) }
-      : { n, status: "failed" };
-  } catch (e) {
-    return { n, status: "error", message: e.message };
-  }
+  return res.data?.id;
 }
 
-/* ===== API ===== */
-app.get("/fb-share", async (req, res) => {
-  const { cookie, link, limit } = req.query;
+// API
+app.post("/fb-share", async (req, res) => {
+  const { cookie, link, limit } = req.body;
 
   if (!cookie || !link || !limit) {
     return res.json({
@@ -97,26 +91,28 @@ app.get("/fb-share", async (req, res) => {
   if (!token) {
     return res.json({
       status: false,
-      message: "Token extraction failed"
+      message: "Token extraction failed (invalid cookie)"
     });
   }
 
   const cookiesObj = parseCookiesToObject(cookie);
   const total = Number(limit);
-  const start = Date.now();
-  let results = [];
+  let success = 0;
 
-  for (let i = 1; i <= total; i++) {
-    results.push(await sharePost(token, cookiesObj, link, i, start, ua));
+  for (let i = 0; i < total; i++) {
+    try {
+      const id = await sharePost(token, cookiesObj, link, ua);
+      if (id) success++;
+    } catch {}
   }
 
   res.json({
     status: true,
-    success: results.filter(r => r.status === "success").length,
-    results
+    message: `Successfully shared ${success}/${total} times`,
+    success
   });
 });
 
-app.listen(PORT, () => {
-  console.log("✅ Server running at http://localhost:" + PORT);
+app.listen(3000, () => {
+  console.log("✅ Running at http://localhost:3000");
 });
