@@ -1,192 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Share Boost</title>
-</head>
-
-<body>
-<div class="wrapper-container">
-
-  <div class="container">
-    <h1>SHARE BOOST</h1>
-    <p>
-      Automated sharing tool using your browser cookies to share
-      Facebook posts using a provided URL.
-    </p>
-  </div>
-
-  <!-- FORM -->
-  <div class="form-wrapper">
-    <form id="shareForm" class="form-container">
-      <div class="form-item">
-        <label>APPSTATE</label>
-        <input type="text" id="cookies" placeholder="Paste appstate JSON here">
-      </div>
-
-      <div class="form-item">
-        <label>LINK</label>
-        <input type="text" id="urls" placeholder="Facebook post URL">
-      </div>
-
-      <div class="form-item">
-        <label>LIMIT</label>
-        <input type="number" id="amounts" placeholder="Number of shares">
-      </div>
-
-      <div class="form-item">
-        <label>DELAY (seconds)</label>
-        <input type="number" id="intervals" placeholder="Delay per share">
-      </div>
-
-      <div class="form-item">
-        <button type="submit" id="submit-button">Submit</button>
-      </div>
-
-      <div class="form-item">
-        <div id="result"></div>
-      </div>
-    </form>
-  </div>
-
-  <!-- PROCESS -->
-  <div class="container" id="process-container">
-    <h1>PROCESSING</h1>
-    <div id="processing"></div>
-  </div>
-
-</div>
-
+<meta charset="UTF-8">
+<title>FB Share Tool</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
-  margin: 0;
-  padding: 20px;
-  background: #000;
   font-family: Arial, sans-serif;
-  color: #999;
+  background: #f4f4f4;
 }
-
 .container {
-  background: #0a0a0a;
+  max-width: 500px;
+  margin: 40px auto;
+  background: #fff;
   padding: 20px;
-  margin: 20px auto;
   border-radius: 8px;
 }
-
-h1 { color: #eee; }
-
-.form-item { padding: 6px; }
-
-label {
-  font-size: 13px;
-  display: block;
-  margin-bottom: 5px;
-}
-
-input, button {
+textarea, input, button {
   width: 100%;
+  margin-top: 10px;
   padding: 10px;
-  background: #000;
-  border: 1px solid #222;
-  color: #fff;
-  border-radius: 4px;
 }
-
 button {
-  background: #eee;
-  color: #000;
+  background: #1877f2;
+  color: white;
+  border: none;
   cursor: pointer;
 }
-
-button:hover { background: #ccc; }
-
-#result {
-  display: none;
-  padding: 10px;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.current-online {
-  font-size: 13px;
+pre {
   background: #111;
+  color: #0f0;
   padding: 10px;
-  margin-bottom: 8px;
-  border: 1px solid #333;
-  border-radius: 4px;
+  margin-top: 15px;
+  max-height: 300px;
+  overflow: auto;
 }
 </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>FB Share Tool (Demo)</h2>
+
+  <textarea id="cookie" placeholder="Paste Cookie Header"></textarea>
+  <input id="link" placeholder="Post link to share">
+  <input id="limit" type="number" placeholder="Share limit">
+
+  <button onclick="start()">Start</button>
+
+  <pre id="output"></pre>
+</div>
 
 <script>
-const form = document.getElementById("shareForm");
-const result = document.getElementById("result");
+async function start() {
+  const cookie = document.getElementById('cookie').value;
+  const link = document.getElementById('link').value;
+  const limit = document.getElementById('limit').value;
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  result.style.display = "block";
-  result.style.background = "#222";
-  result.style.color = "#fff";
-  result.textContent = "Submitting...";
-
-  try {
-    const res = await fetch("/api/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        cookie: cookies.value,
-        url: urls.value,
-        amount: amounts.value,
-        interval: intervals.value
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.status === "started") {
-      result.style.background = "#2ecc71";
-      result.style.color = "#000";
-      result.textContent = "Share session started!";
-      loadProcessing();
-    } else {
-      throw new Error(data.error || "Failed");
-    }
-
-  } catch (err) {
-    result.style.background = "#e74c3c";
-    result.style.color = "#fff";
-    result.textContent = err.message;
-  }
-});
-
-async function loadProcessing() {
-  const container = document.getElementById("processing");
-
-  const res = await fetch("/total");
+  const res = await fetch(`/api/start?cookie=${encodeURIComponent(cookie)}&link=${encodeURIComponent(link)}&limit=${limit}`);
   const data = await res.json();
 
-  container.innerHTML = "";
-
-  if (!data.length) return;
-
-  data.forEach((item, index) => {
-    const div = document.createElement("div");
-    div.className = "current-online";
-    div.id = item.sessionId;
-
-    div.textContent =
-      `${index + 1}. POST: ${item.postId} | ` +
-      `${item.count}/${item.target} | ` +
-      `STATUS: ${item.status}`;
-
-    container.appendChild(div);
-  });
+  document.getElementById('output').textContent =
+    JSON.stringify(data, null, 2);
 }
-
-// auto refresh every 2s
-setInterval(loadProcessing, 2000);
-loadProcessing();
 </script>
 
 </body>
