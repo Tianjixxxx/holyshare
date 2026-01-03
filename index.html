@@ -2,75 +2,88 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>FB Share Tool</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FB Auto Share</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #f2f2f2;
-  padding: 20px;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
-.box {
-  max-width: 520px;
-  background: #fff;
+.card {
+  background: #020617;
   padding: 20px;
-  border-radius: 8px;
-  margin: auto;
+  width: 100%;
+  max-width: 450px;
+  border-radius: 12px;
 }
 textarea, input, button {
   width: 100%;
+  padding: 12px;
   margin-top: 10px;
-  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 button {
-  background: #1877f2;
-  color: white;
-  border: none;
+  background: #2563eb;
+  color: #fff;
   cursor: pointer;
 }
 pre {
-  background: #eee;
+  background: #020617;
   padding: 10px;
   margin-top: 10px;
-  overflow-x: auto;
+  max-height: 260px;
+  overflow: auto;
+  font-size: 13px;
 }
 </style>
 </head>
 <body>
 
-<div class="box">
-  <h2>Facebook Share Website</h2>
+<div class="card">
+  <h2>🚀 FB Auto Share</h2>
 
-  <label>Cookie (HTTP Header)</label>
-  <textarea id="cookie" rows="6"
-    placeholder="Paste FULL Facebook cookie here..."></textarea>
+  <textarea id="cookie" placeholder="Paste Facebook cookie here"></textarea>
+  <input id="link" placeholder="Facebook post link">
+  <input id="limit" type="number" placeholder="Share limit">
 
-  <label>Post Link</label>
-  <input id="link" placeholder="https://facebook.com/..." />
+  <button onclick="start()">Start Sharing</button>
 
-  <label>Share Limit</label>
-  <input id="limit" type="number" value="1" />
-
-  <button onclick="share()">Start</button>
-
-  <pre id="out"></pre>
+  <pre id="output">Waiting...</pre>
 </div>
 
 <script>
-async function share() {
-  const cookie = document.getElementById("cookie").value;
-  const link = document.getElementById("link").value;
-  const limit = document.getElementById("limit").value;
+async function start() {
+  const cookie = document.getElementById("cookie").value.trim();
+  const link = document.getElementById("link").value.trim();
+  const limit = document.getElementById("limit").value.trim();
+  const out = document.getElementById("output");
 
-  const res = await fetch("/fb-share", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cookie, link, limit })
-  });
+  if (!cookie || !link || !limit) {
+    out.textContent = "❌ Fill all fields";
+    return;
+  }
 
-  const data = await res.json();
-  document.getElementById("out").textContent =
-    JSON.stringify(data, null, 2);
+  out.textContent = "⏳ Processing...";
+
+  try {
+    const res = await fetch(
+      `/autoshare?cookie=${encodeURIComponent(cookie)}&link=${encodeURIComponent(link)}&limit=${limit}`
+    );
+    const data = await res.json();
+    out.textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    out.textContent = "❌ Error occurred";
+  }
 }
 </script>
 
