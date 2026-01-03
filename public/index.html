@@ -1,227 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Share Boost</title>
-   </head>
-   <body>
-      <div class="wrapper-container">
-         <div class="container">
-            <h1>SHARE BOOST</h1>
-            <p>A user-friendly automated website that utilizes your browser's cookies to streamline the process of sharing posts on Facebook using the provided URL.</p>
-         </div>
-         <div class="form-wrapper">
-            <form onsubmit="submitForm(event)" class="form-container">
-               <div class="form-item">
-                  <label for="cookies">APPSTATE:</label>
-                  <input type="text" id="cookies" name="cookie" placeholder="">
-               </div>
-               <div class="form-item">
-                  <label for="urls">LINK:</label>
-                  <input type="text" id="urls" name="url" placeholder="">
-               </div>
-               <div class="form-item">
-                  <label for="amounts">LIMIT:</label>
-                  <input type="text" id="amounts" name="amount" placeholder="">
-               </div>
-               <div class="form-item">
-                  <label for="intervals">DELAY:</label>
-                  <input type="text" id="intervals" name="interval" placeholder="" pattern="[0-9]*">
-               </div>
-               <div class="form-item">
-                  <button type="submit" onclick="submitForm()" id="submit-button">Submit</button>
-               </div>
-               <div class="form-item">
-                  <div id="result"></div>
-               </div>
-            </form>
-         </div>
-         <div class="container" id="process-container">
-            <h1>SHARE BOOST</h1>
-            <h4>PROCESSING:</h4>
-            <div id="processing">
-            </div>
-         </div>
-         <div class="container">
-            <h1>SHARE BOOST</h1>
-            <h4>ABOUT US</h4>
-            <p>You can find our open-source repository <a href="https://www.pornhub.com" style="text-decoration: none; color: blue;">here</a>, encouraging developers to contribute, learn, and customize the website</p>
-         </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Share Boost</title>
+</head>
+
+<body>
+<div class="wrapper-container">
+
+  <div class="container">
+    <h1>SHARE BOOST</h1>
+    <p>
+      Automated sharing tool using your browser cookies to share
+      Facebook posts using a provided URL.
+    </p>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-wrapper">
+    <form id="shareForm" class="form-container">
+      <div class="form-item">
+        <label>APPSTATE</label>
+        <input type="text" id="cookies" placeholder="Paste appstate JSON here">
       </div>
-      <style>
-         body, html {
-         margin: 0;
-         }
-         body {
-         padding: 20px;
-         font-family: 'Poppins', sans-serif;
-         background: #000;
-         color: #898989;
-         display: flex;
-         justify-content: center;
-         align-items: center;
-         }
-         .container {
-         background-color: #0a0a0a;
-         border-radius: 10px;
-         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-         padding: 20px;
-         margin: 20px auto;
-         overflow: auto;
-         }
-         .form-item {
-         padding: 8px;
-         }
-         h1 {
-         color: #343a40;
-         }
-         .form-item label {
-         font-size: 13px;
-         color: #495057;
-         margin-bottom: 5px; 
-         display: block; 
-         }
-         input, button {
-         background: #000;
-         color: #fff; 
-         border: solid 1px #222;
-         box-sizing: border-box;
-         width: 100%;
-         margin-bottom: 10px;
-         padding: 10px;
-         border-radius: 4px;
-         font-size: 16px;
-         }
-         button {
-         cursor: none;
-         color: #0a0a0a;
-         background-color: #ededed;
-         }
-         button:hover {
-         background: #CCC;
-         }
-         #result {
-         display: none;
-         text-align: center;
-         background-color: #ededed;
-         border: solid 1px #222;
-         padding: 10px;
-         border-radius: 4px;
-         color: #0a0a0a;
-         }
-         #process {
-         }
-         .current-online {
-         font-size: 13px;
-         background: #0a0a0a;
-         padding: 10px;
-         color: #898989;
-         border: solid 1px #898989;
-         border-radius: 4px;
-         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-         margin-bottom: 10px;
-         overflow: auto;
-         white-space: nowrap; 
-         }
-      </style>
-      <script>
-         async function submitForm() {
-           event.preventDefault();
-           const result = document.getElementById('result');
-           const button = document.getElementById('submit-button');
-           try {
-             result.style.display = 'block';
-             button.style.display = 'none';
-             const response = await fetch('/api/submit', {
-               method: 'POST',
-               body: JSON.stringify({
-                 cookie: document.getElementById('cookies').value,
-                 url: document.getElementById('urls').value,
-                 amount: document.getElementById('amounts').value,
-                 interval: document.getElementById('intervals').value,
-               }),
-               headers: {
-                 'Content-Type': 'application/json',
-               },
-             });
-             const data = await response.json();
 
-             if (data.status === 200) {
-               result.style.backgroundColor = '#32ff0dc7';
-               result.style.color = '#222';
-               result.innerHTML = 'Submitted successfully!';
-               button.style.display = 'block';
-             } else {
-               result.style.backgroundColor = '#3D1619';
-               result.style.color = '#FE6265';
-               result.innerHTML = 'Error: ' + data.error;
-               button.style.display = 'block';
-             }
-           } catch (e) {
-             console.error(e);
-           }
-         }
+      <div class="form-item">
+        <label>LINK</label>
+        <input type="text" id="urls" placeholder="Facebook post URL">
+      </div>
 
-         async function linkOfProcessing() {
-           try {
-             const container = document.getElementById('processing');
-             const processContainer = document.getElementById('process-container');
-             const initialResponse = await fetch('/total');
+      <div class="form-item">
+        <label>LIMIT</label>
+        <input type="number" id="amounts" placeholder="Number of shares">
+      </div>
 
-             if (!initialResponse.ok) {
-               throw new Error(`Failed to fetch: ${initialResponse.status} - ${initialResponse.statusText}`);
-             }
+      <div class="form-item">
+        <label>DELAY (seconds)</label>
+        <input type="number" id="intervals" placeholder="Delay per share">
+      </div>
 
-             const initialData = await initialResponse.json();
-             if (initialData.length === 0) {
-               processContainer.style.display = 'none';
-               return;
-             }
-             initialData.forEach((link, index) => {
+      <div class="form-item">
+        <button type="submit" id="submit-button">Submit</button>
+      </div>
 
-               let { url, count, id, target, session } = link;
-               const processCard = document.createElement('div');
-               processCard.classList.add('current-online');
+      <div class="form-item">
+        <div id="result"></div>
+      </div>
+    </form>
+  </div>
 
-               const text = document.createElement('h4');
-               text.classList.add('count-text');
-               text.innerHTML = `${index + 1}. ID: ${id} | ${count}/${target}`;
+  <!-- PROCESS -->
+  <div class="container" id="process-container">
+    <h1>PROCESSING</h1>
+    <div id="processing"></div>
+  </div>
 
-               processCard.appendChild(text);
-               container.appendChild(processCard);
+</div>
 
-               const intervalId = setInterval(async () => {
-                 const updateResponse = await fetch('/total');
+<style>
+body {
+  margin: 0;
+  padding: 20px;
+  background: #000;
+  font-family: Arial, sans-serif;
+  color: #999;
+}
 
-                 if (!updateResponse.ok) {
-                   console.error(`Failed to fetch update: ${updateResponse.status} - ${updateResponse.statusText}`);
-                   return;
-                 }
+.container {
+  background: #0a0a0a;
+  padding: 20px;
+  margin: 20px auto;
+  border-radius: 8px;
+}
 
-                 const updateData = await updateResponse.json();
-                 const updatedLink = updateData.find((link) => link.session === session);
+h1 { color: #eee; }
 
-                 if (updatedLink) {
-                   let { count } = updatedLink;
-                   update(processCard, count, id, index, target);
-                 }
-               }, 1000);
-             });
+.form-item { padding: 6px; }
 
-           } catch (error) {
-             console.error(error);
-           }
-         }
+label {
+  font-size: 13px;
+  display: block;
+  margin-bottom: 5px;
+}
 
-         function update(card, count, id, index, target) {
-           let container = card.querySelector('.count-text');
-           container.textContent = `${index + 1}. ID: ${id} | ${count}/${target}`;
-         }
+input, button {
+  width: 100%;
+  padding: 10px;
+  background: #000;
+  border: 1px solid #222;
+  color: #fff;
+  border-radius: 4px;
+}
 
-         linkOfProcessing();
+button {
+  background: #eee;
+  color: #000;
+  cursor: pointer;
+}
 
-      </script>
-   </body>
+button:hover { background: #ccc; }
+
+#result {
+  display: none;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.current-online {
+  font-size: 13px;
+  background: #111;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid #333;
+  border-radius: 4px;
+}
+</style>
+
+<script>
+const form = document.getElementById("shareForm");
+const result = document.getElementById("result");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  result.style.display = "block";
+  result.style.background = "#222";
+  result.style.color = "#fff";
+  result.textContent = "Submitting...";
+
+  try {
+    const res = await fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cookie: cookies.value,
+        url: urls.value,
+        amount: amounts.value,
+        interval: intervals.value
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "started") {
+      result.style.background = "#2ecc71";
+      result.style.color = "#000";
+      result.textContent = "Share session started!";
+      loadProcessing();
+    } else {
+      throw new Error(data.error || "Failed");
+    }
+
+  } catch (err) {
+    result.style.background = "#e74c3c";
+    result.style.color = "#fff";
+    result.textContent = err.message;
+  }
+});
+
+async function loadProcessing() {
+  const container = document.getElementById("processing");
+
+  const res = await fetch("/total");
+  const data = await res.json();
+
+  container.innerHTML = "";
+
+  if (!data.length) return;
+
+  data.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "current-online";
+    div.id = item.sessionId;
+
+    div.textContent =
+      `${index + 1}. POST: ${item.postId} | ` +
+      `${item.count}/${item.target} | ` +
+      `STATUS: ${item.status}`;
+
+    container.appendChild(div);
+  });
+}
+
+// auto refresh every 2s
+setInterval(loadProcessing, 2000);
+loadProcessing();
+</script>
+
+</body>
 </html>
