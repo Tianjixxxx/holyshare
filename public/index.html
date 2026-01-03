@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>FB Share Tool</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #f4f4f4;
+  background: #f3f4f6;
+  padding: 20px;
 }
-.container {
+.card {
   max-width: 500px;
-  margin: 40px auto;
-  background: #fff;
+  margin: auto;
+  background: white;
   padding: 20px;
   border-radius: 8px;
 }
@@ -32,35 +33,41 @@ pre {
   color: #0f0;
   padding: 10px;
   margin-top: 15px;
-  max-height: 300px;
-  overflow: auto;
+  overflow-x: auto;
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>FB Share Tool (Demo)</h2>
+<div class="card">
+  <h2>Facebook Share Tool</h2>
+  <p>Uses cookie-based sharing via Graph API</p>
 
-  <textarea id="cookie" placeholder="Paste Cookie Header"></textarea>
-  <input id="link" placeholder="Post link to share">
-  <input id="limit" type="number" placeholder="Share limit">
+  <textarea id="cookie" placeholder="Paste FB cookie here"></textarea>
+  <input id="link" placeholder="Post link to share" />
+  <input id="limit" type="number" placeholder="Share limit" />
 
-  <button onclick="start()">Start</button>
+  <button onclick="start()">Start Share</button>
 
-  <pre id="output"></pre>
+  <pre id="result">Waiting...</pre>
 </div>
 
 <script>
 async function start() {
-  const cookie = document.getElementById('cookie').value;
-  const link = document.getElementById('link').value;
-  const limit = document.getElementById('limit').value;
+  const cookie = document.getElementById("cookie").value;
+  const link = document.getElementById("link").value;
+  const limit = document.getElementById("limit").value;
 
-  const res = await fetch(`/api/start?cookie=${encodeURIComponent(cookie)}&link=${encodeURIComponent(link)}&limit=${limit}`);
+  document.getElementById("result").textContent = "Processing...";
+
+  const res = await fetch("/api/share", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ cookie, link, limit })
+  });
+
   const data = await res.json();
-
-  document.getElementById('output').textContent =
+  document.getElementById("result").textContent =
     JSON.stringify(data, null, 2);
 }
 </script>
