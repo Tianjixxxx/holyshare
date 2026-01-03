@@ -1,111 +1,47 @@
 const express = require("express");
-const axios = require("axios");
-const qs = require("querystring");
+const multer = require("multer");
+const fetch = require("node-fetch");
+const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const upload = multer({ dest: "uploads/" });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
+app.use(express.static(__dirname));
 
-const uaList = [
-  "Mozilla/5.0 (Linux; Android 10) Chrome/105.0 Mobile",
-  "Mozilla/5.0 (Linux; Android 11) Chrome/87.0 Mobile",
-  "Mozilla/5.0 (Linux; Android 11) Chrome/106.0 Mobile"
-];
-
-// extract EAAG token
-async function extractToken(cookie, ua) {
+app.post("/removebg", upload.single("image"), async (req, res) => {
   try {
-    const res = await axios.get(
-      "https://business.facebook.com/business_locations",
+    const imageBuffer = fs.readFileSync(req.file.path);
+
+    const apiRes = await fetch(
+      "https://api-library-kohi.onrender.com/api/removebg",
       {
+        method: "POST",
         headers: {
-          "User-Agent": ua,
-          "Referer": "https://www.facebook.com/",
-          "Cookie": cookie
+          "Content-Type": "application/octet-stream"
         },
-        timeout: 15000
+        body: imageBuffer
       }
     );
-    const match = String(res.data).match(/(EAAG\w+)/);
-    return match ? match[1] : null;
-  } catch {
-    return null;
-  }
-}
 
-function parseCookiesToObject(cookie) {
-  const out = {};
-  cookie.split(";").forEach(p => {
-    const [k, ...v] = p.split("=");
-    if (k && v.length) out[k.trim()] = v.join("=").trim();
-  });
-  return out;
-}
+    const json = await apiRes.json();
+    fs.unlinkSync(req.file.path);
 
-async function sharePost(token, cookiesObj, link, ua) {
-  const body = qs.stringify({
-    link,
-    access_token: token
-  });
-
-  const res = await axios.post(
-    "https://graph.facebook.com/v18.0/me/feed",
-    body,
-    {
-      headers: {
-        "User-Agent": ua,
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Cookie": Object.entries(cookiesObj)
-          .map(e => e.join("="))
-          .join("; ")
-      },
-      timeout: 15000
+    if (!json.status) {
+      return res.status(400).json({ error: "Failed to process image" });
     }
-  );
 
-  return res.data?.id ? true : false;
-}
+    // Fetch the result image and stream it
+    const imageRes = await fetch(json.data.url);
+    res.setHeader("Content-Type", "image/png");
+    imageRes.body.pipe(res);
 
-// API endpoint
-app.post("/api/share", async (req, res) => {
-  const { cookie, link, limit } = req.body;
-
-  if (!cookie || !link || !limit) {
-    return res.json({ status: false, message: "Missing fields" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
-
-  const ua = uaList[Math.floor(Math.random() * uaList.length)];
-  const token = await extractToken(cookie, ua);
-
-  if (!token) {
-    return res.json({
-      status: false,
-      message: "Invalid or expired cookie"
-    });
-  }
-
-  const cookiesObj = parseCookiesToObject(cookie);
-  let success = 0;
-
-  for (let i = 0; i < Number(limit); i++) {
-    try {
-      const ok = await sharePost(token, cookiesObj, link, ua);
-      if (ok) success++;
-      await new Promise(r => setTimeout(r, 1000));
-    } catch {}
-  }
-
-  res.json({
-    status: true,
-    message: `Shared ${success} times`,
-    success
-  });
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+app.listen(3000, () => {
+  console.log("Server running at http://localhost:3000");
 });
