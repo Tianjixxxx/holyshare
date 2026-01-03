@@ -1,14 +1,19 @@
 {
-  "name": "autoshare-website",
+  "name": "share-boost",
   "version": "1.0.0",
-  "description": "Facebook Auto Share Website (Cookie Based)",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "axios": "^1.6.5",
-    "express": "^4.19.2",
-    "cors": "^2.8.5"
+    "@types/node": "^18.0.6",
+    "axios": "^1.6.7",
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "node-fetch": "^3.2.6"
   }
 }
