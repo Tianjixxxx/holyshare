@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB safety
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 /* ===== HELPER ===== */
@@ -49,7 +49,7 @@ app.post("/removebg", upload.single("image"), async (req, res) => {
       encodeURIComponent(img);
 
     const r = await axios.get(api);
-    res.json({ url: r.data.data.url });
+    res.json({ url: r.data.data.url, tool: "removebg" });
   } catch (e) {
     res.status(500).json({ error: true });
   }
@@ -64,7 +64,7 @@ app.post("/upscale", upload.single("image"), async (req, res) => {
       encodeURIComponent(img);
 
     const r = await axios.get(api);
-    res.json({ url: r.data.data.url });
+    res.json({ url: r.data.data.url, tool: "upscale" });
   } catch {
     res.status(500).json({ error: true });
   }
@@ -78,7 +78,7 @@ app.post("/blur", upload.single("image"), async (req, res) => {
       "https://api.popcat.xyz/v2/blur?image=" +
       encodeURIComponent(img);
 
-    res.json({ url: blurURL });
+    res.json({ url: blurURL, tool: "blur" });
   } catch {
     res.status(500).json({ error: true });
   }
@@ -110,34 +110,43 @@ app.post("/accept-terms", (req, res) => {
 });
 
 /* ======================================================
-   FORCE FILE DOWNLOAD
+   DIRECT FILE DOWNLOAD (IMPROVED)
 ====================================================== */
 app.get("/download", async (req, res) => {
   try {
     const url = req.query.url;
-    if (!url) return res.status(400).end();
+    const tool = req.query.tool || "image";
+
+    if (!url) {
+      return res.status(400).json({ error: "Missing url" });
+    }
 
     const response = await axios.get(url, {
-      responseType: "stream"
+      responseType: "stream",
+      timeout: 15000
     });
 
-    const filename =
-      "image_" + Date.now() + path.extname(url.split("?")[0] || ".png");
+    const ext =
+      path.extname(url.split("?")[0]) || ".png";
+
+    const filename = `${tool}_${Date.now()}${ext}`;
 
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="${filename}"`
     );
     res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Cache-Control", "no-store");
 
     response.data.pipe(res);
-  } catch (e) {
+  } catch (err) {
+    console.error("Download error:", err.message);
     res.status(500).end();
   }
 });
 
 /* ======================================================
-   AUTO CLEANUP (OPTIONAL SAFE)
+   AUTO CLEANUP (SAFE)
 ====================================================== */
 setInterval(() => {
   fs.readdir("uploads", (_, files) => {
@@ -151,7 +160,7 @@ setInterval(() => {
       });
     });
   });
-}, 1000 * 60 * 30); // every 30 min
+}, 1000 * 60 * 30);
 
 /* ======================================================
    START SERVER
