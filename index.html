@@ -3,137 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <title>Image Tools</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- FAVICONS (SVG ICONS) -->
-<link rel="icon" type="image/svg+xml"
-href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z'/></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 :root{
-  --bg:#020617;
-  --card:#020617;
-  --border:#1e293b;
-  --text:#e5e7eb;
-  --muted:#94a3b8;
+  --bg:#0f172a;
+  --card:#111827;
   --accent:#6366f1;
+  --text:#ffffff;
+  --muted:#94a3b8;
 }
-
-.light{
-  --bg:#f8fafc;
-  --card:#ffffff;
-  --border:#e5e7eb;
-  --text:#020617;
-  --muted:#475569;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
-  font-family:system-ui;
   background:var(--bg);
+  font-family:system-ui,-apple-system;
   color:var(--text);
 }
 
 .container{
   max-width:420px;
   margin:auto;
-  padding:14px;
+  padding:16px;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
 }
 
 .card{
-  margin-top:14px;
-  padding:14px;
-  border-radius:16px;
-  border:1px solid var(--border);
+  width:100%;
   background:var(--card);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
 }
 
-h2,h3{margin:0 0 10px}
+/* HEADER */
+.header{text-align:center}
+.header h2{margin:0;font-size:22px}
+.header p{margin:6px 0 14px;color:var(--muted);font-size:13px}
 
 /* TABS */
-.tabs{display:flex;gap:6px}
+.tabs{
+  display:flex;
+  background:#020617;
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:14px;
+}
 .tab{
   flex:1;
   padding:10px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:transparent;
   text-align:center;
-  font-size:12px;
+  font-size:13px;
   cursor:pointer;
+  color:var(--muted);
 }
-.tab.active{background:var(--accent);color:white}
-
-/* BUTTON */
-button{
-  width:100%;
-  margin-top:12px;
-  padding:12px;
-  border:none;
-  border-radius:14px;
+.tab.active{
   background:var(--accent);
   color:white;
   font-weight:600;
 }
 
-/* ICON BUTTON */
-.icon-btn{
-  width:38px;
-  height:38px;
-  border-radius:50%;
+/* INPUT */
+input[type=file]{
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  background:#020617;
+  border:1px solid #1e293b;
+  color:#cbd5f5;
+}
+
+.preview{
+  display:none;
+  width:100%;
+  border-radius:14px;
+  margin-top:12px;
+}
+
+/* BUTTON */
+.action-btn{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+  border:none;
+  border-radius:14px;
   background:var(--accent);
   color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  font-size:15px;
+  font-weight:600;
   cursor:pointer;
 }
 
-/* PREVIEW */
-img{
-  width:100%;
-  border-radius:14px;
-  margin-top:10px;
+/* LOADER */
+.loader{
+  display:none;
+  width:42px;
+  height:42px;
+  margin:18px auto;
+  border:4px solid #1e293b;
+  border-top:4px solid var(--accent);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
 }
+@keyframes spin{100%{transform:rotate(360deg)}}
 
 /* COMPARISON */
 .compare{
+  display:none;
   position:relative;
-  margin-top:10px;
+  margin-top:14px;
 }
 .compare img{
-  position:absolute;
-  inset:0;
   width:100%;
-  height:100%;
-  object-fit:cover;
+  border-radius:16px;
 }
-.compare .after{
-  clip-path:inset(0 0 0 50%);
+.after{
+  position:absolute;
+  top:0;left:0;
+  height:100%;
+  width:50%;
+  overflow:hidden;
 }
 .compare input{
   width:100%;
+  margin-top:10px;
+}
+
+/* DOWNLOAD ICON */
+.download-icon{
+  width:22px;
+  height:22px;
+  margin:14px auto 0;
   position:relative;
-  z-index:2;
+  cursor:pointer;
+}
+.download-icon::before{
+  content:"";
+  position:absolute;
+  top:2px;left:9px;
+  width:4px;height:11px;
+  background:#c7d2fe;
+  border-radius:2px;
+}
+.download-icon::after{
+  content:"";
+  position:absolute;
+  top:10px;left:6px;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-top:6px solid #c7d2fe;
 }
 
-/* STATUS */
-.status-item{
-  display:flex;
-  justify-content:space-between;
+/* SYSTEM INFO */
+.sys{
+  margin-top:20px;
+  padding-top:14px;
+  border-top:1px solid #1e293b;
   font-size:12px;
-  margin-bottom:6px;
+  color:var(--muted);
+}
+.sys div{margin-bottom:4px}
+
+/* DONATION */
+.donation{
+  margin-top:18px;
+  text-align:center;
+}
+.donation img{
+  width:100%;
+  max-width:220px;
+  opacity:.6;
+  border-radius:14px;
 }
 
-/* FLOATING */
-.float{
+/* FLOATING HEART */
+.floating-heart{
   position:fixed;
-  bottom:18px;
-  right:18px;
+  right:16px;
+  bottom:16px;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:#ef4444;
   display:flex;
-  flex-direction:column;
-  gap:10px;
-  z-index:9;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  cursor:pointer;
+  box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.modal-card{
+  background:#020617;
+  padding:20px;
+  border-radius:18px;
+  width:90%;
+  max-width:300px;
+  text-align:center;
+}
+.modal-card button{
+  margin-top:14px;
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:var(--accent);
+  color:white;
 }
 </style>
 </head>
@@ -141,108 +228,118 @@ img{
 <body>
 
 <div class="container">
-
-<!-- TOOLS -->
 <div class="card">
-  <h2>🛠 Image Tools</h2>
 
-  <div class="tabs">
-    <div class="tab active" onclick="setTool('removebg',this)">Remove BG</div>
-    <div class="tab" onclick="setTool('upscale',this)">Upscale</div>
-    <div class="tab" onclick="setTool('blur',this)">Blur</div>
-  </div>
-
-  <input type="file" id="file" accept="image/*">
-  <button onclick="run()">Process</button>
-
-  <!-- COMPARISON -->
-  <div class="compare" id="compare" hidden>
-    <img id="before">
-    <img id="after" class="after">
-    <input type="range" min="0" max="100" value="50"
-      oninput="after.style.clipPath='inset(0 0 0 '+this.value+'%)'">
-  </div>
-
-  <!-- RESULT -->
-  <img id="result" hidden>
+<div class="header">
+<h2>🖼 Image Tools</h2>
+<p>Remove BG · Upscale · Blur</p>
 </div>
 
-<!-- STATUS -->
-<div class="card">
-  <h3>📊 Status</h3>
-  <div class="status-item"><span>TIME:</span><b id="time"></b></div>
-  <div class="status-item"><span>DATE:</span><b id="date"></b></div>
-  <div class="status-item"><span>IP ADDRESS:</span><b id="ip"></b></div>
-  <div class="status-item"><span>BATTERY:</span><b id="battery"></b></div>
+<div class="tabs">
+<div class="tab active" onclick="setTool('removebg',this)">Remove BG</div>
+<div class="tab" onclick="setTool('upscale',this)">Upscale</div>
+<div class="tab" onclick="setTool('blur',this)">Blur</div>
 </div>
 
-<!-- DONATION -->
-<div class="card">
-  <h3>💙 GCash Donation</h3>
-  <img src="imgUrl" alt="GCash QR Placeholder">
+<input type="file" id="file" accept="image/*">
+<img id="preview" class="preview">
+
+<button class="action-btn" onclick="run()">Process Image</button>
+
+<div class="loader" id="loader"></div>
+
+<div class="compare" id="compare">
+<img id="beforeImg">
+<div class="after" id="afterWrap">
+<img id="afterImg">
+</div>
+<input type="range" min="1" max="100" value="50" id="slider">
+</div>
+
+<div id="downloadIcon" class="download-icon" hidden></div>
+
+<div class="sys">
+<div id="date"></div>
+<div id="ip"></div>
+<div id="battery"></div>
+</div>
+
+<div class="donation">
+<img src="imgUrl" alt="Donation placeholder">
 </div>
 
 </div>
+</div>
 
-<!-- FLOATING BUTTONS -->
-<div class="float">
-  <!-- DARK/LIGHT -->
-  <div class="icon-btn" onclick="toggleTheme()">🌓</div>
+<div class="floating-heart" onclick="openTip()">❤️</div>
 
-  <!-- DOWNLOAD -->
-  <div class="icon-btn" onclick="download()">⬇</div>
-
-  <!-- GCASH -->
-  <div class="icon-btn" onclick="alert('Scan GCash QR below ❤️')">❤️</div>
+<div class="modal" id="tipModal">
+<div class="modal-card">
+<h3>❤️ Support</h3>
+<p>Your tip helps keep this tool alive.</p>
+<button onclick="closeTip()">Close</button>
+</div>
 </div>
 
 <script>
-let tool="removebg", finalURL="";
+let currentTool="removebg";
 
-function setTool(t,el){
-  tool=t;
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  el.classList.add("active");
+/* TAB */
+function setTool(t,e){
+currentTool=t;
+document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+e.classList.add("active");
 }
 
+/* PREVIEW */
+file.onchange=()=>{
+const f=file.files[0];
+if(!f)return;
+preview.src=URL.createObjectURL(f);
+preview.style.display="block";
+beforeImg.src=preview.src;
+}
+
+/* SLIDER */
+slider.oninput=e=>{
+afterWrap.style.width=e.target.value+"%";
+}
+
+/* RUN */
 async function run(){
-  const f=file.files[0];
-  if(!f) return alert("Select image");
+const f=file.files[0];
+if(!f)return alert("Select image");
+const fd=new FormData();
+fd.append("image",f);
 
-  before.src=URL.createObjectURL(f);
+loader.style.display="block";
+compare.style.display="none";
+downloadIcon.hidden=true;
 
-  const fd=new FormData();
-  fd.append("image",f);
+const r=await fetch("/"+currentTool,{method:"POST",body:fd});
+const d=await r.json();
 
-  const r=await fetch("/"+tool,{method:"POST",body:fd});
-  const d=await r.json();
+loader.style.display="none";
+afterImg.src=d.url;
+afterWrap.style.width="50%";
+compare.style.display="block";
 
-  finalURL=d.url;
-  after.src=d.url;
-
-  compare.hidden=false;
-  result.hidden=true;
+downloadIcon.onclick=()=>location.href="/download?url="+encodeURIComponent(d.url);
+downloadIcon.hidden=false;
 }
 
-function download(){
-  if(!finalURL) return;
-  location.href="/download?url="+encodeURIComponent(finalURL);
-}
+/* TIP */
+function openTip(){tipModal.style.display="flex"}
+function closeTip(){tipModal.style.display="none"}
 
-function toggleTheme(){
-  document.body.classList.toggle("light");
-}
-
-/* STATUS */
+/* INFO */
 fetch("/info").then(r=>r.json()).then(d=>{
-  const now=new Date(d.time);
-  time.textContent=now.toLocaleTimeString("en-US",{timeZone:"Asia/Manila"});
-  date.textContent=now.toLocaleDateString("en-US",{timeZone:"Asia/Manila"});
-  ip.textContent=d.ip;
+date.textContent="Date: "+new Date(d.time).toLocaleString("en-US",{timeZone:"Asia/Manila"});
+ip.textContent="IP: "+d.ip;
 });
 
 navigator.getBattery().then(b=>{
-  battery.textContent=Math.round(b.level*100)+"%";
+battery.textContent="Battery: "+Math.round(b.level*100)+"%";
 });
 </script>
 
