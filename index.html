@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Image Tools</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.ico">
 
 <style>
 :root{
@@ -13,13 +14,19 @@
   --text:#ffffff;
   --muted:#94a3b8;
 }
-*{box-sizing:border-box}
+.light{
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --text:#020617;
+  --muted:#475569;
+}
 
+*{box-sizing:border-box}
 body{
   margin:0;
   background:var(--bg);
-  font-family:system-ui,-apple-system;
   color:var(--text);
+  font-family:system-ui;
 }
 
 .container{
@@ -30,60 +37,48 @@ body{
   display:flex;
   align-items:center;
 }
-
 .card{
   width:100%;
   background:var(--card);
   border-radius:20px;
   padding:20px;
-  box-shadow:0 20px 50px rgba(0,0,0,.6);
+  box-shadow:0 20px 50px rgba(0,0,0,.4);
 }
 
-/* HEADER */
 .header{text-align:center}
-.header h2{margin:0;font-size:22px}
-.header p{margin:6px 0 14px;color:var(--muted);font-size:13px}
+.header h2{margin:0}
+.header p{color:var(--muted)}
 
-/* TABS */
 .tabs{
   display:flex;
   background:#020617;
   border-radius:14px;
   overflow:hidden;
-  margin-bottom:14px;
 }
 .tab{
   flex:1;
   padding:10px;
   text-align:center;
-  font-size:13px;
   cursor:pointer;
+  font-size:13px;
   color:var(--muted);
 }
 .tab.active{
   background:var(--accent);
-  color:white;
-  font-weight:600;
+  color:#fff;
 }
 
-/* INPUT */
 input[type=file]{
   width:100%;
+  margin-top:12px;
   padding:12px;
   border-radius:14px;
   background:#020617;
-  border:1px solid #1e293b;
   color:#cbd5f5;
 }
 
-.preview{
-  display:none;
-  width:100%;
-  border-radius:14px;
-  margin-top:12px;
-}
+.preview{display:none;width:100%;margin-top:12px;border-radius:14px}
 
-/* BUTTON */
 .action-btn{
   width:100%;
   margin-top:12px;
@@ -92,17 +87,13 @@ input[type=file]{
   border-radius:14px;
   background:var(--accent);
   color:white;
-  font-size:15px;
   font-weight:600;
-  cursor:pointer;
 }
 
-/* LOADER */
 .loader{
   display:none;
-  width:42px;
-  height:42px;
-  margin:18px auto;
+  width:40px;height:40px;
+  margin:16px auto;
   border:4px solid #1e293b;
   border-top:4px solid var(--accent);
   border-radius:50%;
@@ -110,91 +101,44 @@ input[type=file]{
 }
 @keyframes spin{100%{transform:rotate(360deg)}}
 
-/* COMPARISON */
-.compare{
+.compare{display:none;position:relative;margin-top:12px}
+.compare img{width:100%;border-radius:16px}
+.after{position:absolute;top:0;left:0;height:100%;width:50%;overflow:hidden}
+
+.download-btn{
   display:none;
-  position:relative;
   margin-top:14px;
-}
-.compare img{
   width:100%;
-  border-radius:16px;
-}
-.after{
-  position:absolute;
-  top:0;left:0;
-  height:100%;
-  width:50%;
-  overflow:hidden;
-}
-.compare input{
-  width:100%;
-  margin-top:10px;
+  padding:12px;
+  border-radius:14px;
+  background:#020617;
+  color:#c7d2fe;
+  font-weight:600;
+  border:1px solid #1e293b;
 }
 
-/* DOWNLOAD ICON */
-.download-icon{
-  width:22px;
-  height:22px;
-  margin:14px auto 0;
-  position:relative;
-  cursor:pointer;
-}
-.download-icon::before{
-  content:"";
-  position:absolute;
-  top:2px;left:9px;
-  width:4px;height:11px;
-  background:#c7d2fe;
-  border-radius:2px;
-}
-.download-icon::after{
-  content:"";
-  position:absolute;
-  top:10px;left:6px;
-  border-left:5px solid transparent;
-  border-right:5px solid transparent;
-  border-top:6px solid #c7d2fe;
-}
-
-/* SYSTEM INFO */
 .sys{
-  margin-top:20px;
-  padding-top:14px;
-  border-top:1px solid #1e293b;
+  margin-top:18px;
   font-size:12px;
   color:var(--muted);
 }
-.sys div{margin-bottom:4px}
 
-/* DONATION */
-.donation{
-  margin-top:18px;
-  text-align:center;
-}
-.donation img{
-  width:100%;
-  max-width:220px;
-  opacity:.6;
-  border-radius:14px;
-}
-
-/* FLOATING HEART */
-.floating-heart{
+/* FLOATING BUTTONS */
+.floating{
   position:fixed;
   right:16px;
-  bottom:16px;
-  width:56px;
-  height:56px;
+  width:52px;
+  height:52px;
   border-radius:50%;
-  background:#ef4444;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:26px;
+  font-size:22px;
   cursor:pointer;
   box-shadow:0 10px 25px rgba(0,0,0,.4);
 }
+.heart{bottom:16px;background:#ef4444}
+.theme{bottom:80px;background:#0ea5e9}
 
 /* MODAL */
 .modal{
@@ -210,17 +154,17 @@ input[type=file]{
   padding:20px;
   border-radius:18px;
   width:90%;
-  max-width:300px;
+  max-width:320px;
   text-align:center;
 }
 .modal-card button{
-  margin-top:14px;
   width:100%;
   padding:12px;
   border:none;
   border-radius:12px;
   background:var(--accent);
   color:white;
+  margin-top:12px;
 }
 </style>
 </head>
@@ -256,7 +200,9 @@ input[type=file]{
 <input type="range" min="1" max="100" value="50" id="slider">
 </div>
 
-<div id="downloadIcon" class="download-icon" hidden></div>
+<button id="downloadBtn" class="download-btn">
+🖼 Download
+</button>
 
 <div class="sys">
 <div id="date"></div>
@@ -264,27 +210,29 @@ input[type=file]{
 <div id="battery"></div>
 </div>
 
-<div class="donation">
-<img src="imgUrl" alt="Donation placeholder">
-</div>
-
 </div>
 </div>
 
-<div class="floating-heart" onclick="openTip()">❤️</div>
+<!-- FLOATING -->
+<div class="floating theme" onclick="toggleTheme()">🌙</div>
+<div class="floating heart" onclick="openTip()">❤️</div>
 
-<div class="modal" id="tipModal">
+<!-- TERMS MODAL -->
+<div class="modal" id="termsModal">
 <div class="modal-card">
-<h3>❤️ Support</h3>
-<p>Your tip helps keep this tool alive.</p>
-<button onclick="closeTip()">Close</button>
+<h3>👋 Welcome</h3>
+<p>
+By using this site you agree to our<br>
+<b>Terms & Privacy Policy</b>.
+</p>
+<button onclick="acceptTerms()">Agree & Continue</button>
 </div>
 </div>
 
 <script>
 let currentTool="removebg";
 
-/* TAB */
+/* TOOL TAB */
 function setTool(t,e){
 currentTool=t;
 document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
@@ -314,7 +262,7 @@ fd.append("image",f);
 
 loader.style.display="block";
 compare.style.display="none";
-downloadIcon.hidden=true;
+downloadBtn.style.display="none";
 
 const r=await fetch("/"+currentTool,{method:"POST",body:fd});
 const d=await r.json();
@@ -324,23 +272,41 @@ afterImg.src=d.url;
 afterWrap.style.width="50%";
 compare.style.display="block";
 
-downloadIcon.onclick=()=>location.href="/download?url="+encodeURIComponent(d.url);
-downloadIcon.hidden=false;
+downloadBtn.onclick=()=>{
+location.href="/download?url="+encodeURIComponent(d.url);
+};
+downloadBtn.style.display="block";
 }
 
-/* TIP */
-function openTip(){tipModal.style.display="flex"}
-function closeTip(){tipModal.style.display="none"}
-
-/* INFO */
+/* SYSTEM INFO */
 fetch("/info").then(r=>r.json()).then(d=>{
-date.textContent="Date: "+new Date(d.time).toLocaleString("en-US",{timeZone:"Asia/Manila"});
+date.textContent="Date: "+new Date(d.time).toLocaleString("en-PH");
 ip.textContent="IP: "+d.ip;
 });
 
 navigator.getBattery().then(b=>{
 battery.textContent="Battery: "+Math.round(b.level*100)+"%";
 });
+
+/* TERMS */
+if(!document.cookie.includes("termsAccepted")){
+termsModal.style.display="flex";
+}
+function acceptTerms(){
+fetch("/accept-terms",{method:"POST"}).then(()=>{
+termsModal.style.display="none";
+});
+}
+
+/* THEME */
+function toggleTheme(){
+document.body.classList.toggle("light");
+}
+
+/* TIP */
+function openTip(){
+alert("Thank you for supporting ❤️");
+}
 </script>
 
 </body>
