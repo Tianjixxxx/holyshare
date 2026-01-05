@@ -7,7 +7,6 @@
 <link rel="icon" href="/favicon.ico">
 
 <style>
-/* ===== THEME ===== */
 :root{
   --bg:#0f172a;
   --card:#111827;
@@ -28,8 +27,6 @@ body{
   color:var(--text);
   font-family:system-ui;
 }
-
-/* ===== LAYOUT ===== */
 .container{
   max-width:420px;
   margin:auto;
@@ -46,10 +43,8 @@ body{
   box-shadow:0 20px 50px rgba(0,0,0,.4);
 }
 .header{text-align:center}
-.header h2{margin:0}
 .header p{color:var(--muted)}
 
-/* ===== TABS ===== */
 .tabs{
   display:flex;
   background:#020617;
@@ -69,7 +64,6 @@ body{
   color:#fff;
 }
 
-/* ===== INPUT ===== */
 input[type=file]{
   width:100%;
   margin-top:12px;
@@ -78,14 +72,14 @@ input[type=file]{
   background:#020617;
   color:#cbd5f5;
 }
+
 .preview{
   display:none;
   width:100%;
   margin-top:12px;
-  border-radius:16px;
+  border-radius:14px;
 }
 
-/* ===== BUTTONS ===== */
 .action-btn{
   width:100%;
   margin-top:12px;
@@ -96,6 +90,19 @@ input[type=file]{
   color:white;
   font-weight:600;
 }
+
+.loader{
+  display:none;
+  width:40px;
+  height:40px;
+  margin:16px auto;
+  border:4px solid #1e293b;
+  border-top:4px solid var(--accent);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{100%{transform:rotate(360deg)}}
+
 .download-btn{
   display:none;
   margin-top:14px;
@@ -108,42 +115,37 @@ input[type=file]{
   border:1px solid #1e293b;
 }
 
-/* ===== LOADER ===== */
-.loader{
-  display:none;
-  width:40px;height:40px;
-  margin:16px auto;
-  border:4px solid #1e293b;
-  border-top:4px solid var(--accent);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
+/* DONATION */
+.donation{
+  margin-top:20px;
+  padding:14px;
+  border-radius:16px;
+  background:#020617;
+  text-align:center;
+  border:1px dashed #334155;
 }
-@keyframes spin{100%{transform:rotate(360deg)}}
+.donation h4{
+  margin:0 0 6px;
+}
+.donation p{
+  margin:0 0 10px;
+  font-size:13px;
+  color:var(--muted);
+}
+.donation img{
+  width:100%;
+  max-width:220px;
+  border-radius:12px;
+  opacity:.6;
+}
 
-/* ===== SYSTEM ===== */
 .sys{
   margin-top:18px;
   font-size:12px;
   color:var(--muted);
 }
 
-/* ===== DONATION ===== */
-.donation{
-  margin-top:20px;
-  text-align:center;
-}
-.donation img{
-  width:100%;
-  border-radius:16px;
-  border:1px dashed #334155;
-}
-.donation p{
-  margin-top:8px;
-  font-size:13px;
-  color:var(--muted);
-}
-
-/* ===== FLOATING ===== */
+/* FLOATING */
 .floating{
   position:fixed;
   right:16px;
@@ -157,10 +159,10 @@ input[type=file]{
   cursor:pointer;
   box-shadow:0 10px 25px rgba(0,0,0,.4);
 }
-.heart{bottom:16px;background:#ef4444}
 .theme{bottom:80px;background:#0ea5e9}
+.heart{bottom:16px;background:#ef4444}
 
-/* ===== MODAL ===== */
+/* MODAL */
 .modal{
   position:fixed;
   inset:0;
@@ -190,7 +192,6 @@ input[type=file]{
 </head>
 
 <body>
-
 <div class="container">
 <div class="card">
 
@@ -209,14 +210,16 @@ input[type=file]{
 <img id="preview" class="preview">
 
 <button class="action-btn" onclick="run()">Process Image</button>
+
 <div class="loader" id="loader"></div>
 
-<button id="downloadBtn" class="download-btn">⬇ Download Image</button>
+<button id="downloadBtn" class="download-btn">⬇️ Download Image</button>
 
 <!-- DONATION PLACEHOLDER -->
 <div class="donation">
-<img src="https://via.placeholder.com/400x220?text=GCash+Donation+Placeholder">
-<p>Support this tool via GCash ❤️</p>
+  <h4>❤️ Support via GCash</h4>
+  <p>Scan the QR or use your GCash app</p>
+  <img src="https://via.placeholder.com/300x300?text=GCash+QR+Placeholder" alt="GCash QR">
 </div>
 
 <div class="sys">
@@ -242,77 +245,65 @@ input[type=file]{
 <script>
 let currentTool="removebg";
 
-/* TOOL */
 function setTool(t,e){
-currentTool=t;
-document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-e.classList.add("active");
+  currentTool=t;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  e.classList.add("active");
 }
 
-/* PREVIEW */
 file.onchange=()=>{
-const f=file.files[0];
-if(!f)return;
-preview.src=URL.createObjectURL(f);
-preview.style.display="block";
-}
-
-/* RUN */
-async function run(){
-const f=file.files[0];
-if(!f)return alert("Select image");
-
-const fd=new FormData();
-fd.append("image",f);
-
-loader.style.display="block";
-downloadBtn.style.display="none";
-
-const r=await fetch("/"+currentTool,{method:"POST",body:fd});
-const d=await r.json();
-
-loader.style.display="none";
-preview.src=d.url;
-preview.style.display="block";
-
-/* DIRECT FILE DOWNLOAD */
-downloadBtn.onclick=()=>{
-const a=document.createElement("a");
-a.href="/download?url="+encodeURIComponent(d.url);
-a.click();
+  const f=file.files[0];
+  if(!f)return;
+  preview.src=URL.createObjectURL(f);
+  preview.style.display="block";
 };
-downloadBtn.style.display="block";
+
+async function run(){
+  const f=file.files[0];
+  if(!f)return alert("Select image");
+
+  const fd=new FormData();
+  fd.append("image",f);
+
+  loader.style.display="block";
+  downloadBtn.style.display="none";
+
+  const r=await fetch("/"+currentTool,{method:"POST",body:fd});
+  const d=await r.json();
+
+  loader.style.display="none";
+  preview.src=d.url;
+  preview.style.display="block";
+
+  downloadBtn.onclick=()=>{
+    location.href="/download?url="+encodeURIComponent(d.url);
+  };
+  downloadBtn.style.display="block";
 }
 
-/* SYSTEM INFO */
 fetch("/info").then(r=>r.json()).then(d=>{
-date.textContent="Date: "+new Date(d.time).toLocaleString("en-PH");
-ip.textContent="IP: "+d.ip;
+  date.textContent="Date: "+new Date(d.time).toLocaleString("en-PH");
+  ip.textContent="IP: "+d.ip;
 });
 navigator.getBattery().then(b=>{
-battery.textContent="Battery: "+Math.round(b.level*100)+"%";
+  battery.textContent="Battery: "+Math.round(b.level*100)+"%";
 });
 
-/* TERMS */
 if(!document.cookie.includes("termsAccepted")){
-termsModal.style.display="flex";
+  termsModal.style.display="flex";
 }
 function acceptTerms(){
-fetch("/accept-terms",{method:"POST"}).then(()=>{
-termsModal.style.display="none";
-});
+  fetch("/accept-terms",{method:"POST"}).then(()=>{
+    termsModal.style.display="none";
+  });
 }
 
-/* THEME */
 function toggleTheme(){
-document.body.classList.toggle("light");
+  document.body.classList.toggle("light");
 }
-
-/* TIP */
 function openTip(){
-alert("Thank you for supporting ❤️");
+  alert("Thank you for supporting ❤️");
 }
 </script>
-
 </body>
 </html>
