@@ -2,239 +2,227 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Image Tools Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- SITE FAVICON -->
-<link rel="icon" type="image/png" href="/favicon.png">
-<link rel="apple-touch-icon" href="/favicon.png">
-<meta name="theme-color" content="#6366f1">
+<title>Image Tools</title>
+<link rel="icon" href="favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 <style>
 :root{
-  --card:rgba(255,255,255,.08);
-  --border:rgba(255,255,255,.15);
-  --text:#e5e7eb;
-  --blue:#6366f1;
-  --green:#22c55e;
-  --red:#ef4444;
+  --bg:#0f172a;
+  --card:#111827;
+  --accent:#6366f1;
+  --text:#fff;
+  --muted:#94a3b8;
 }
 
 *{box-sizing:border-box}
 
 body{
   margin:0;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:radial-gradient(circle at top, #1e293b, #020617);
-  font-family:system-ui, -apple-system;
+  background:var(--bg);
+  font-family:system-ui,-apple-system;
   color:var(--text);
 }
 
-.card{
-  width:380px;
-  max-width:95%;
-  padding:22px;
-  border-radius:20px;
-  background:var(--card);
-  border:1px solid var(--border);
-  backdrop-filter:blur(15px);
-  box-shadow:0 20px 40px rgba(0,0,0,.5);
-  text-align:center;
+/* CONTAINER */
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:16px;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
 }
 
-h2{margin:0 0 15px;font-weight:600}
+/* CARD */
+.card{
+  width:100%;
+  background:var(--card);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
+}
 
+/* HEADER */
+.header{
+  text-align:center;
+  margin-bottom:15px;
+}
+.header h2{
+  margin:0;
+  font-size:22px;
+}
+.header p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* INPUT */
 input[type=file]{
   width:100%;
-  padding:10px;
+  padding:12px;
   background:#020617;
-  border:1px dashed var(--border);
-  border-radius:10px;
-  color:#94a3b8;
+  color:#cbd5f5;
+  border-radius:14px;
+  border:1px solid #1e293b;
 }
 
-.section{margin-top:18px}
+/* BUTTONS */
+.actions{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:14px;
+}
 
 button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
+  padding:14px;
   border:none;
-  border-radius:12px;
+  border-radius:14px;
+  background:var(--accent);
+  color:white;
   font-size:15px;
   font-weight:600;
   cursor:pointer;
-  transition:.25s;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-}
-
-button:disabled{opacity:.6;cursor:not-allowed}
-
-.blue{background:var(--blue);color:#fff}
-.green{background:var(--green);color:#052e16}
-.red{background:var(--red);color:#fff}
-
-button:hover:not(:disabled){
-  transform:translateY(-1px);
-  filter:brightness(1.1);
-}
-
-img.result{
-  width:100%;
-  border-radius:12px;
-  margin-top:12px;
-  border:1px solid var(--border);
-}
-
-/* DOWNLOAD ICON BUTTON */
-.icon-btn img{
-  width:18px;
-  height:18px;
 }
 
 /* LOADER */
 .loader{
+  display:none;
   width:42px;
   height:42px;
-  border:4px solid rgba(255,255,255,.2);
-  border-top:4px solid #fff;
+  margin:18px auto;
+  border:4px solid #1e293b;
+  border-top:4px solid var(--accent);
   border-radius:50%;
   animation:spin 1s linear infinite;
-  margin:15px auto;
 }
-@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spin{100%{transform:rotate(360deg)}}
 
-.fade{animation:fade .4s ease}
-@keyframes fade{
-  from{opacity:0;transform:scale(.97)}
-  to{opacity:1;transform:none}
+/* RESULT */
+.result{
+  width:100%;
+  border-radius:16px;
+  margin-top:14px;
 }
 
-a{text-decoration:none}
+/* FAVICON DOWNLOAD */
+.favicon-download{
+  width:22px;
+  height:22px;
+  margin:12px auto 0;
+  display:block;
+  cursor:pointer;
+  opacity:.85;
+}
+.favicon-download:hover{
+  opacity:1;
+  transform:scale(1.15);
+}
+
+/* DONATION */
+.donation{
+  margin-top:22px;
+  padding-top:16px;
+  border-top:1px solid #1e293b;
+  text-align:center;
+}
+.donation h3{
+  margin:0;
+  font-size:15px;
+}
+.donation p{
+  font-size:12px;
+  color:var(--muted);
+  margin:6px 0 10px;
+}
+.donation img{
+  width:100%;
+  max-width:220px;
+  border-radius:14px;
+  opacity:.6;
+}
 </style>
 </head>
-
 <body>
 
-<div class="card">
-  <h2>🖼 Image Tools Pro</h2>
+<div class="container">
+  <div class="card">
 
-  <input type="file" id="image" accept="image/*">
+    <!-- HEADER -->
+    <div class="header">
+      <h2>🖼 Image Tools</h2>
+      <p>Remove BG · Upscale · Blur</p>
+    </div>
 
-  <div class="section">
-    <button class="blue" onclick="removeBg()">Remove Background</button>
-    <div id="remove"></div>
-  </div>
+    <!-- FILE -->
+    <input type="file" id="file" accept="image/*">
 
-  <div class="section">
-    <button class="green" onclick="upscale()">Upscale Image</button>
-    <div id="upscale"></div>
-  </div>
+    <!-- ACTIONS -->
+    <div class="actions">
+      <button onclick="run('removebg')">Remove Background</button>
+      <button onclick="run('upscale')">Upscale Image</button>
+      <button onclick="run('blur')">Blur Image</button>
+    </div>
 
-  <div class="section">
-    <button class="red" onclick="blurImage()">Blur Image</button>
-    <div id="blur"></div>
+    <!-- LOADER -->
+    <div class="loader" id="loader"></div>
+
+    <!-- RESULT -->
+    <img id="result" class="result" hidden>
+
+    <!-- DOWNLOAD ICON -->
+    <img
+      src="favicon-download.png"
+      id="downloadIcon"
+      class="favicon-download"
+      title="Download image"
+      hidden
+    >
+
+    <!-- DONATION -->
+    <div class="donation">
+      <h3>❤️ Support This Project</h3>
+      <p>If this tool helps you, consider donating</p>
+
+      <!-- PLACEHOLDER imgUrl -->
+      <img
+        src="imgUrl"
+        alt="Donation QR / Image Placeholder"
+      >
+    </div>
+
   </div>
 </div>
 
 <script>
-let currentUrl = "";
-const buttons = document.querySelectorAll("button");
-
-function setLoading(el){
-  buttons.forEach(b=>b.disabled=true);
-  el.innerHTML = '<div class="loader"></div>';
-}
-
-function done(){
-  buttons.forEach(b=>b.disabled=false);
-}
-
-async function removeBg(){
-  const file = image.files[0];
-  if(!file) return alert("Select an image");
+async function run(type){
+  const file = document.getElementById("file").files[0];
+  if(!file) return alert("Please select an image");
 
   const fd = new FormData();
   fd.append("image", file);
 
-  setLoading(remove);
+  loader.style.display = "block";
+  result.hidden = true;
+  downloadIcon.hidden = true;
 
-  const res = await fetch("/removebg",{method:"POST",body:fd});
-  const data = await res.json();
-
-  currentUrl = data.url;
-  done();
-
-  remove.innerHTML = `
-    <div class="fade">
-      <img class="result" src="${data.url}">
-      <a href="/download?url=${encodeURIComponent(data.url)}">
-        <button class="blue icon-btn">
-          <img src="/download.png" alt="download"> Download
-        </button>
-      </a>
-    </div>
-  `;
-}
-
-async function upscale(){
-  if(!currentUrl) return alert("Process image first");
-
-  setLoading(upscale);
-
-  const res = await fetch("/upscale",{
+  const res = await fetch("/"+type,{
     method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({url:currentUrl})
+    body:fd
   });
-
   const data = await res.json();
-  currentUrl = data.url;
-  done();
 
-  upscale.innerHTML = `
-    <div class="fade">
-      <img class="result" src="${data.url}">
-      <a href="/download?url=${encodeURIComponent(data.url)}">
-        <button class="green icon-btn">
-          <img src="/download.png"> Download Upscaled
-        </button>
-      </a>
-    </div>
-  `;
-}
+  loader.style.display = "none";
+  result.src = data.url;
+  result.hidden = false;
 
-async function blurImage(){
-  if(!currentUrl) return alert("Process image first");
-
-  setLoading(blur);
-
-  const res = await fetch("/blur",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({url:currentUrl})
-  });
-
-  const data = await res.json();
-  currentUrl = data.url;
-  done();
-
-  blur.innerHTML = `
-    <div class="fade">
-      <img class="result" src="${data.url}">
-      <a href="/download?url=${encodeURIComponent(data.url)}">
-        <button class="red icon-btn">
-          <img src="/download.png"> Download Blurred
-        </button>
-      </a>
-    </div>
-  `;
+  downloadIcon.onclick = () => {
+    location.href =
+      "/download?url="+encodeURIComponent(data.url);
+  };
+  downloadIcon.hidden = false;
 }
 </script>
 
