@@ -1,47 +1,50 @@
 const express = require("express");
 const multer = require("multer");
-const fetch = require("node-fetch");
+const axios = require("axios");
+const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const upload = multer({ dest: "uploads/" });
+const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.static(__dirname));
+app.use("/uploads", express.static("uploads"));
 
-app.post("/removebg", upload.single("image"), async (req, res) => {
-  try {
-    const imageBuffer = fs.readFileSync(req.file.path);
+if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
 
-    const apiRes = await fetch(
-      "https://api-library-kohi.onrender.com/api/removebg",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/octet-stream"
-        },
-        body: imageBuffer
-      }
-    );
-
-    const json = await apiRes.json();
-    fs.unlinkSync(req.file.path);
-
-    if (!json.status) {
-      return res.status(400).json({ error: "Failed to process image" });
-    }
-
-    // Fetch the result image and stream it
-    const imageRes = await fetch(json.data.url);
-    res.setHeader("Content-Type", "image/png");
-    imageRes.body.pipe(res);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
-app.listen(3000, () => {
-  console.log("Server running at http://localhost:3000");
+const upload = multer({ storage });
+
+app.post("/removebg", upload.single("image"), async (req, res) => {
+  try {
+    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+    const apiUrl = `https://api-library-kohi.onrender.com/api/removebg?url=${encodeURIComponent(imageUrl)}`;
+
+    const response = await axios.get(apiUrl);
+
+    if (!response.data.status) {
+      return res.status(400).json({ error: "Failed to remove background" });
+    }
+
+    res.json({
+      success: true,
+      result: response.data.data.url
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
