@@ -7,6 +7,7 @@
 <link rel="icon" href="/favicon.ico">
 
 <style>
+/* ===== THEME ===== */
 :root{
   --bg:#0f172a;
   --card:#111827;
@@ -20,7 +21,6 @@
   --text:#020617;
   --muted:#475569;
 }
-
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -29,6 +29,7 @@ body{
   font-family:system-ui;
 }
 
+/* ===== LAYOUT ===== */
 .container{
   max-width:420px;
   margin:auto;
@@ -44,11 +45,11 @@ body{
   padding:20px;
   box-shadow:0 20px 50px rgba(0,0,0,.4);
 }
-
 .header{text-align:center}
 .header h2{margin:0}
 .header p{color:var(--muted)}
 
+/* ===== TABS ===== */
 .tabs{
   display:flex;
   background:#020617;
@@ -68,6 +69,7 @@ body{
   color:#fff;
 }
 
+/* ===== INPUT ===== */
 input[type=file]{
   width:100%;
   margin-top:12px;
@@ -76,7 +78,6 @@ input[type=file]{
   background:#020617;
   color:#cbd5f5;
 }
-
 .preview{
   display:none;
   width:100%;
@@ -84,6 +85,7 @@ input[type=file]{
   border-radius:16px;
 }
 
+/* ===== BUTTONS ===== */
 .action-btn{
   width:100%;
   margin-top:12px;
@@ -94,18 +96,6 @@ input[type=file]{
   color:white;
   font-weight:600;
 }
-
-.loader{
-  display:none;
-  width:40px;height:40px;
-  margin:16px auto;
-  border:4px solid #1e293b;
-  border-top:4px solid var(--accent);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-}
-@keyframes spin{100%{transform:rotate(360deg)}}
-
 .download-btn{
   display:none;
   margin-top:14px;
@@ -118,13 +108,42 @@ input[type=file]{
   border:1px solid #1e293b;
 }
 
+/* ===== LOADER ===== */
+.loader{
+  display:none;
+  width:40px;height:40px;
+  margin:16px auto;
+  border:4px solid #1e293b;
+  border-top:4px solid var(--accent);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{100%{transform:rotate(360deg)}}
+
+/* ===== SYSTEM ===== */
 .sys{
   margin-top:18px;
   font-size:12px;
   color:var(--muted);
 }
 
-/* FLOATING BUTTONS */
+/* ===== DONATION ===== */
+.donation{
+  margin-top:20px;
+  text-align:center;
+}
+.donation img{
+  width:100%;
+  border-radius:16px;
+  border:1px dashed #334155;
+}
+.donation p{
+  margin-top:8px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* ===== FLOATING ===== */
 .floating{
   position:fixed;
   right:16px;
@@ -141,7 +160,7 @@ input[type=file]{
 .heart{bottom:16px;background:#ef4444}
 .theme{bottom:80px;background:#0ea5e9}
 
-/* MODAL */
+/* ===== MODAL ===== */
 .modal{
   position:fixed;
   inset:0;
@@ -190,12 +209,15 @@ input[type=file]{
 <img id="preview" class="preview">
 
 <button class="action-btn" onclick="run()">Process Image</button>
-
 <div class="loader" id="loader"></div>
 
-<button id="downloadBtn" class="download-btn">
-🖼 Download
-</button>
+<button id="downloadBtn" class="download-btn">⬇ Download Image</button>
+
+<!-- DONATION PLACEHOLDER -->
+<div class="donation">
+<img src="https://via.placeholder.com/400x220?text=GCash+Donation+Placeholder">
+<p>Support this tool via GCash ❤️</p>
+</div>
 
 <div class="sys">
 <div id="date"></div>
@@ -206,18 +228,13 @@ input[type=file]{
 </div>
 </div>
 
-<!-- FLOATING -->
 <div class="floating theme" onclick="toggleTheme()">🌙</div>
 <div class="floating heart" onclick="openTip()">❤️</div>
 
-<!-- TERMS MODAL -->
 <div class="modal" id="termsModal">
 <div class="modal-card">
 <h3>👋 Welcome</h3>
-<p>
-By using this site you agree to our<br>
-<b>Terms & Privacy Policy</b>.
-</p>
+<p>By using this site you agree to our<br><b>Terms & Privacy Policy</b>.</p>
 <button onclick="acceptTerms()">Agree & Continue</button>
 </div>
 </div>
@@ -225,7 +242,7 @@ By using this site you agree to our<br>
 <script>
 let currentTool="removebg";
 
-/* TOOL TAB */
+/* TOOL */
 function setTool(t,e){
 currentTool=t;
 document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
@@ -244,6 +261,7 @@ preview.style.display="block";
 async function run(){
 const f=file.files[0];
 if(!f)return alert("Select image");
+
 const fd=new FormData();
 fd.append("image",f);
 
@@ -257,8 +275,11 @@ loader.style.display="none";
 preview.src=d.url;
 preview.style.display="block";
 
+/* DIRECT FILE DOWNLOAD */
 downloadBtn.onclick=()=>{
-location.href="/download?url="+encodeURIComponent(d.url);
+const a=document.createElement("a");
+a.href="/download?url="+encodeURIComponent(d.url);
+a.click();
 };
 downloadBtn.style.display="block";
 }
@@ -268,7 +289,6 @@ fetch("/info").then(r=>r.json()).then(d=>{
 date.textContent="Date: "+new Date(d.time).toLocaleString("en-PH");
 ip.textContent="IP: "+d.ip;
 });
-
 navigator.getBattery().then(b=>{
 battery.textContent="Battery: "+Math.round(b.level*100)+"%";
 });
