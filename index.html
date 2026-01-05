@@ -77,7 +77,12 @@ input[type=file]{
   color:#cbd5f5;
 }
 
-.preview{display:none;width:100%;margin-top:12px;border-radius:14px}
+.preview{
+  display:none;
+  width:100%;
+  margin-top:12px;
+  border-radius:16px;
+}
 
 .action-btn{
   width:100%;
@@ -100,10 +105,6 @@ input[type=file]{
   animation:spin 1s linear infinite;
 }
 @keyframes spin{100%{transform:rotate(360deg)}}
-
-.compare{display:none;position:relative;margin-top:12px}
-.compare img{width:100%;border-radius:16px}
-.after{position:absolute;top:0;left:0;height:100%;width:50%;overflow:hidden}
 
 .download-btn{
   display:none;
@@ -192,14 +193,6 @@ input[type=file]{
 
 <div class="loader" id="loader"></div>
 
-<div class="compare" id="compare">
-<img id="beforeImg">
-<div class="after" id="afterWrap">
-<img id="afterImg">
-</div>
-<input type="range" min="1" max="100" value="50" id="slider">
-</div>
-
 <button id="downloadBtn" class="download-btn">
 🖼 Download
 </button>
@@ -245,12 +238,6 @@ const f=file.files[0];
 if(!f)return;
 preview.src=URL.createObjectURL(f);
 preview.style.display="block";
-beforeImg.src=preview.src;
-}
-
-/* SLIDER */
-slider.oninput=e=>{
-afterWrap.style.width=e.target.value+"%";
 }
 
 /* RUN */
@@ -261,16 +248,14 @@ const fd=new FormData();
 fd.append("image",f);
 
 loader.style.display="block";
-compare.style.display="none";
 downloadBtn.style.display="none";
 
 const r=await fetch("/"+currentTool,{method:"POST",body:fd});
 const d=await r.json();
 
 loader.style.display="none";
-afterImg.src=d.url;
-afterWrap.style.width="50%";
-compare.style.display="block";
+preview.src=d.url;
+preview.style.display="block";
 
 downloadBtn.onclick=()=>{
 location.href="/download?url="+encodeURIComponent(d.url);
