@@ -3,227 +3,247 @@
 <head>
 <meta charset="UTF-8">
 <title>Image Tools</title>
-<link rel="icon" href="favicon.png">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- FAVICONS (SVG ICONS) -->
+<link rel="icon" type="image/svg+xml"
+href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z'/></svg>">
 
 <style>
 :root{
-  --bg:#0f172a;
-  --card:#111827;
-  --accent:#6366f1;
-  --text:#fff;
+  --bg:#020617;
+  --card:#020617;
+  --border:#1e293b;
+  --text:#e5e7eb;
   --muted:#94a3b8;
+  --accent:#6366f1;
 }
 
-*{box-sizing:border-box}
+.light{
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --text:#020617;
+  --muted:#475569;
+}
 
 body{
   margin:0;
+  font-family:system-ui;
   background:var(--bg);
-  font-family:system-ui,-apple-system;
   color:var(--text);
 }
 
-/* CONTAINER */
 .container{
   max-width:420px;
   margin:auto;
-  padding:16px;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-}
-
-/* CARD */
-.card{
-  width:100%;
-  background:var(--card);
-  border-radius:20px;
-  padding:20px;
-  box-shadow:0 20px 50px rgba(0,0,0,.6);
-}
-
-/* HEADER */
-.header{
-  text-align:center;
-  margin-bottom:15px;
-}
-.header h2{
-  margin:0;
-  font-size:22px;
-}
-.header p{
-  margin:5px 0 0;
-  color:var(--muted);
-  font-size:13px;
-}
-
-/* INPUT */
-input[type=file]{
-  width:100%;
-  padding:12px;
-  background:#020617;
-  color:#cbd5f5;
-  border-radius:14px;
-  border:1px solid #1e293b;
-}
-
-/* BUTTONS */
-.actions{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-top:14px;
-}
-
-button{
   padding:14px;
+}
+
+.card{
+  margin-top:14px;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background:var(--card);
+}
+
+h2,h3{margin:0 0 10px}
+
+/* TABS */
+.tabs{display:flex;gap:6px}
+.tab{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  text-align:center;
+  font-size:12px;
+  cursor:pointer;
+}
+.tab.active{background:var(--accent);color:white}
+
+/* BUTTON */
+button{
+  width:100%;
+  margin-top:12px;
+  padding:12px;
   border:none;
   border-radius:14px;
   background:var(--accent);
   color:white;
-  font-size:15px;
   font-weight:600;
-  cursor:pointer;
 }
 
-/* LOADER */
-.loader{
-  display:none;
-  width:42px;
-  height:42px;
-  margin:18px auto;
-  border:4px solid #1e293b;
-  border-top:4px solid var(--accent);
+/* ICON BUTTON */
+.icon-btn{
+  width:38px;
+  height:38px;
   border-radius:50%;
-  animation:spin 1s linear infinite;
-}
-@keyframes spin{100%{transform:rotate(360deg)}}
-
-/* RESULT */
-.result{
-  width:100%;
-  border-radius:16px;
-  margin-top:14px;
-}
-
-/* FAVICON DOWNLOAD */
-.favicon-download{
-  width:22px;
-  height:22px;
-  margin:12px auto 0;
-  display:block;
+  background:var(--accent);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
-  opacity:.85;
-}
-.favicon-download:hover{
-  opacity:1;
-  transform:scale(1.15);
 }
 
-/* DONATION */
-.donation{
-  margin-top:22px;
-  padding-top:16px;
-  border-top:1px solid #1e293b;
-  text-align:center;
-}
-.donation h3{
-  margin:0;
-  font-size:15px;
-}
-.donation p{
-  font-size:12px;
-  color:var(--muted);
-  margin:6px 0 10px;
-}
-.donation img{
+/* PREVIEW */
+img{
   width:100%;
-  max-width:220px;
   border-radius:14px;
-  opacity:.6;
+  margin-top:10px;
+}
+
+/* COMPARISON */
+.compare{
+  position:relative;
+  margin-top:10px;
+}
+.compare img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.compare .after{
+  clip-path:inset(0 0 0 50%);
+}
+.compare input{
+  width:100%;
+  position:relative;
+  z-index:2;
+}
+
+/* STATUS */
+.status-item{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  margin-bottom:6px;
+}
+
+/* FLOATING */
+.float{
+  position:fixed;
+  bottom:18px;
+  right:18px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:9;
 }
 </style>
 </head>
+
 <body>
 
 <div class="container">
-  <div class="card">
 
-    <!-- HEADER -->
-    <div class="header">
-      <h2>🖼 Image Tools</h2>
-      <p>Remove BG · Upscale · Blur</p>
-    </div>
+<!-- TOOLS -->
+<div class="card">
+  <h2>🛠 Image Tools</h2>
 
-    <!-- FILE -->
-    <input type="file" id="file" accept="image/*">
-
-    <!-- ACTIONS -->
-    <div class="actions">
-      <button onclick="run('removebg')">Remove Background</button>
-      <button onclick="run('upscale')">Upscale Image</button>
-      <button onclick="run('blur')">Blur Image</button>
-    </div>
-
-    <!-- LOADER -->
-    <div class="loader" id="loader"></div>
-
-    <!-- RESULT -->
-    <img id="result" class="result" hidden>
-
-    <!-- DOWNLOAD ICON -->
-    <img
-      src="favicon-download.png"
-      id="downloadIcon"
-      class="favicon-download"
-      title="Download image"
-      hidden
-    >
-
-    <!-- DONATION -->
-    <div class="donation">
-      <h3>❤️ Support This Project</h3>
-      <p>If this tool helps you, consider donating</p>
-
-      <!-- PLACEHOLDER imgUrl -->
-      <img
-        src="imgUrl"
-        alt="Donation QR / Image Placeholder"
-      >
-    </div>
-
+  <div class="tabs">
+    <div class="tab active" onclick="setTool('removebg',this)">Remove BG</div>
+    <div class="tab" onclick="setTool('upscale',this)">Upscale</div>
+    <div class="tab" onclick="setTool('blur',this)">Blur</div>
   </div>
+
+  <input type="file" id="file" accept="image/*">
+  <button onclick="run()">Process</button>
+
+  <!-- COMPARISON -->
+  <div class="compare" id="compare" hidden>
+    <img id="before">
+    <img id="after" class="after">
+    <input type="range" min="0" max="100" value="50"
+      oninput="after.style.clipPath='inset(0 0 0 '+this.value+'%)'">
+  </div>
+
+  <!-- RESULT -->
+  <img id="result" hidden>
+</div>
+
+<!-- STATUS -->
+<div class="card">
+  <h3>📊 Status</h3>
+  <div class="status-item"><span>TIME:</span><b id="time"></b></div>
+  <div class="status-item"><span>DATE:</span><b id="date"></b></div>
+  <div class="status-item"><span>IP ADDRESS:</span><b id="ip"></b></div>
+  <div class="status-item"><span>BATTERY:</span><b id="battery"></b></div>
+</div>
+
+<!-- DONATION -->
+<div class="card">
+  <h3>💙 GCash Donation</h3>
+  <img src="imgUrl" alt="GCash QR Placeholder">
+</div>
+
+</div>
+
+<!-- FLOATING BUTTONS -->
+<div class="float">
+  <!-- DARK/LIGHT -->
+  <div class="icon-btn" onclick="toggleTheme()">🌓</div>
+
+  <!-- DOWNLOAD -->
+  <div class="icon-btn" onclick="download()">⬇</div>
+
+  <!-- GCASH -->
+  <div class="icon-btn" onclick="alert('Scan GCash QR below ❤️')">❤️</div>
 </div>
 
 <script>
-async function run(type){
-  const file = document.getElementById("file").files[0];
-  if(!file) return alert("Please select an image");
+let tool="removebg", finalURL="";
 
-  const fd = new FormData();
-  fd.append("image", file);
-
-  loader.style.display = "block";
-  result.hidden = true;
-  downloadIcon.hidden = true;
-
-  const res = await fetch("/"+type,{
-    method:"POST",
-    body:fd
-  });
-  const data = await res.json();
-
-  loader.style.display = "none";
-  result.src = data.url;
-  result.hidden = false;
-
-  downloadIcon.onclick = () => {
-    location.href =
-      "/download?url="+encodeURIComponent(data.url);
-  };
-  downloadIcon.hidden = false;
+function setTool(t,el){
+  tool=t;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
 }
+
+async function run(){
+  const f=file.files[0];
+  if(!f) return alert("Select image");
+
+  before.src=URL.createObjectURL(f);
+
+  const fd=new FormData();
+  fd.append("image",f);
+
+  const r=await fetch("/"+tool,{method:"POST",body:fd});
+  const d=await r.json();
+
+  finalURL=d.url;
+  after.src=d.url;
+
+  compare.hidden=false;
+  result.hidden=true;
+}
+
+function download(){
+  if(!finalURL) return;
+  location.href="/download?url="+encodeURIComponent(finalURL);
+}
+
+function toggleTheme(){
+  document.body.classList.toggle("light");
+}
+
+/* STATUS */
+fetch("/info").then(r=>r.json()).then(d=>{
+  const now=new Date(d.time);
+  time.textContent=now.toLocaleTimeString("en-US",{timeZone:"Asia/Manila"});
+  date.textContent=now.toLocaleDateString("en-US",{timeZone:"Asia/Manila"});
+  ip.textContent=d.ip;
+});
+
+navigator.getBattery().then(b=>{
+  battery.textContent=Math.round(b.level*100)+"%";
+});
 </script>
 
 </body>
