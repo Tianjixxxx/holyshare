@@ -2,79 +2,241 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Remove Background</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Tools Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SITE FAVICON -->
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<meta name="theme-color" content="#6366f1">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+:root{
+  --card:rgba(255,255,255,.08);
+  --border:rgba(255,255,255,.15);
+  --text:#e5e7eb;
+  --blue:#6366f1;
+  --green:#22c55e;
+  --red:#ef4444;
 }
-.card {
-  background: #fff;
-  padding: 20px;
-  width: 320px;
-  border-radius: 10px;
-  text-align: center;
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle at top, #1e293b, #020617);
+  font-family:system-ui, -apple-system;
+  color:var(--text);
 }
-button {
-  padding: 10px;
-  width: 100%;
-  background: #4f46e5;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+
+.card{
+  width:380px;
+  max-width:95%;
+  padding:22px;
+  border-radius:20px;
+  background:var(--card);
+  border:1px solid var(--border);
+  backdrop-filter:blur(15px);
+  box-shadow:0 20px 40px rgba(0,0,0,.5);
+  text-align:center;
 }
-img {
-  max-width: 100%;
-  margin-top: 15px;
+
+h2{margin:0 0 15px;font-weight:600}
+
+input[type=file]{
+  width:100%;
+  padding:10px;
+  background:#020617;
+  border:1px dashed var(--border);
+  border-radius:10px;
+  color:#94a3b8;
 }
+
+.section{margin-top:18px}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.25s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+button:disabled{opacity:.6;cursor:not-allowed}
+
+.blue{background:var(--blue);color:#fff}
+.green{background:var(--green);color:#052e16}
+.red{background:var(--red);color:#fff}
+
+button:hover:not(:disabled){
+  transform:translateY(-1px);
+  filter:brightness(1.1);
+}
+
+img.result{
+  width:100%;
+  border-radius:12px;
+  margin-top:12px;
+  border:1px solid var(--border);
+}
+
+/* DOWNLOAD ICON BUTTON */
+.icon-btn img{
+  width:18px;
+  height:18px;
+}
+
+/* LOADER */
+.loader{
+  width:42px;
+  height:42px;
+  border:4px solid rgba(255,255,255,.2);
+  border-top:4px solid #fff;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:15px auto;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.fade{animation:fade .4s ease}
+@keyframes fade{
+  from{opacity:0;transform:scale(.97)}
+  to{opacity:1;transform:none}
+}
+
+a{text-decoration:none}
 </style>
 </head>
 
 <body>
-<div class="card">
-  <h3>Remove Background</h3>
-  <input type="file" id="image" accept="image/*"><br><br>
-  <button onclick="removeBg()">Upload</button>
 
-  <div id="result"></div>
+<div class="card">
+  <h2>🖼 Image Tools Pro</h2>
+
+  <input type="file" id="image" accept="image/*">
+
+  <div class="section">
+    <button class="blue" onclick="removeBg()">Remove Background</button>
+    <div id="remove"></div>
+  </div>
+
+  <div class="section">
+    <button class="green" onclick="upscale()">Upscale Image</button>
+    <div id="upscale"></div>
+  </div>
+
+  <div class="section">
+    <button class="red" onclick="blurImage()">Blur Image</button>
+    <div id="blur"></div>
+  </div>
 </div>
 
 <script>
-async function removeBg() {
-  const file = document.getElementById("image").files[0];
-  if (!file) return alert("Select an image");
+let currentUrl = "";
+const buttons = document.querySelectorAll("button");
 
-  const formData = new FormData();
-  formData.append("image", file);
+function setLoading(el){
+  buttons.forEach(b=>b.disabled=true);
+  el.innerHTML = '<div class="loader"></div>';
+}
 
-  document.getElementById("result").innerHTML = "Processing...";
+function done(){
+  buttons.forEach(b=>b.disabled=false);
+}
 
-  const res = await fetch("/removebg", {
-    method: "POST",
-    body: formData
+async function removeBg(){
+  const file = image.files[0];
+  if(!file) return alert("Select an image");
+
+  const fd = new FormData();
+  fd.append("image", file);
+
+  setLoading(remove);
+
+  const res = await fetch("/removebg",{method:"POST",body:fd});
+  const data = await res.json();
+
+  currentUrl = data.url;
+  done();
+
+  remove.innerHTML = `
+    <div class="fade">
+      <img class="result" src="${data.url}">
+      <a href="/download?url=${encodeURIComponent(data.url)}">
+        <button class="blue icon-btn">
+          <img src="/download.png" alt="download"> Download
+        </button>
+      </a>
+    </div>
+  `;
+}
+
+async function upscale(){
+  if(!currentUrl) return alert("Process image first");
+
+  setLoading(upscale);
+
+  const res = await fetch("/upscale",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({url:currentUrl})
   });
 
   const data = await res.json();
+  currentUrl = data.url;
+  done();
 
-  if (data.success) {
-    document.getElementById("result").innerHTML = `
-      <img src="${data.result}">
-      <br>
-      <a href="${data.result}" download>
-        <button>Download</button>
+  upscale.innerHTML = `
+    <div class="fade">
+      <img class="result" src="${data.url}">
+      <a href="/download?url=${encodeURIComponent(data.url)}">
+        <button class="green icon-btn">
+          <img src="/download.png"> Download Upscaled
+        </button>
       </a>
-    `;
-  } else {
-    document.getElementById("result").innerHTML = "Error processing image";
-  }
+    </div>
+  `;
+}
+
+async function blurImage(){
+  if(!currentUrl) return alert("Process image first");
+
+  setLoading(blur);
+
+  const res = await fetch("/blur",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({url:currentUrl})
+  });
+
+  const data = await res.json();
+  currentUrl = data.url;
+  done();
+
+  blur.innerHTML = `
+    <div class="fade">
+      <img class="result" src="${data.url}">
+      <a href="/download?url=${encodeURIComponent(data.url)}">
+        <button class="red icon-btn">
+          <img src="/download.png"> Download Blurred
+        </button>
+      </a>
+    </div>
+  `;
 }
 </script>
+
 </body>
 </html>
