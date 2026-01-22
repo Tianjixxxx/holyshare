@@ -3,6 +3,7 @@ const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const morgan = require('morgan');
 
@@ -20,6 +21,13 @@ app.use(helmet({
     }
 }));
 
+// Rate limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100,
+    message: { status: false, message: 'Too many requests, please try again later.' }
+});
+
 // Middleware
 app.use(cors());
 app.use(morgan('dev'));
@@ -29,8 +37,8 @@ app.use(express.urlencoded({ extended: true }));
 // Static files
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '1d',
-    setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.html')) {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.html')) {
             res.setHeader('Cache-Control', 'no-cache');
         }
     }
@@ -40,196 +48,239 @@ app.use(express.static(path.join(__dirname, 'public'), {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// User agents
+// Enhanced user agents list
 const ua_list = [
-    "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/105.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/106.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 Chrome/108.0 Mobile Safari/537.36"
+    "Mozilla/5.0 (Linux; Android 10; Wildfire E Lite) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/105.0.5195.136 Mobile Safari/537.36[FBAN/EMA;FBLC/en_US;FBAV/298.0.0.10.115;]",
+    "Mozilla/5.0 (Linux; Android 11; KINGKONG 5 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/87.0.4280.141 Mobile Safari/537.36[FBAN/EMA;FBLC/fr_FR;FBAV/320.0.0.12.108;]",
+    "Mozilla/5.0 (Linux; Android 11; G91 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/106.0.5249.126 Mobile Safari/537.36[FBAN/EMA;FBLC/fr_FR;FBAV/325.0.1.4.108;]"
 ];
 
-// In-memory storage
+// In-memory storage for demo (replace with database in production)
 const shareHistory = [];
 const activeShares = new Map();
 
-// Extract token
+// Enhanced token extraction with retry logic
 async function extract_token(cookie, ua, retries = 3) {
     for (let i = 0; i < retries; i++) {
         try {
-            const res = await axios.get(
-                "https://business.facebook.com/business_locations",
-                {
-                    headers: {
-                        "user-agent": ua,
-                        "cookie": cookie
-                    },
-                    timeout: 10000
-                }
-            );
-
-            const match = res.data.match(/(EAAG\w+)/);
-            if (match) return match[1];
-
-        } catch (err) {
-            if (i === retries - 1) return null;
-            await new Promise(r => setTimeout(r, 1000));
+            const response = await axios.get("https://business.facebook.com/business_locations", {
+                headers: {
+                    "user-agent": ua,
+                    "referer": "https://www.facebook.com/",
+                    "Cookie": cookie,
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Connection": "keep-alive",
+                    "Upgrade-Insecure-Requests": "1"
+                },
+                timeout: 10000
+            });
+            
+            const tokenMatch = response.data.match(/(EAAG\w+)/);
+            if (tokenMatch) {
+                return tokenMatch[1];
+            }
+        } catch (error) {
+            if (i === retries - 1) {
+                console.error('Token extraction failed:', error.message);
+                return null;
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
         }
     }
     return null;
 }
 
-// Home
+// Home page
 app.get("/", (req, res) => {
-    res.render("index", {
+    res.render("index", { 
         title: "Facebook Share Booster",
         mode: req.cookies?.theme || 'light'
     });
 });
 
-// Share API (POST)
-app.post("/api/share", async (req, res) => {
-    try {
-        const { cookie, link, limit, session_id } = req.body;
-        const amount = parseInt(limit);
+// Privacy Policy Modal
+app.get("/privacy-policy", (req, res) => {
+    res.render("privacy-modal");
+});
 
-        if (!cookie || !link || !amount) {
-            return res.status(400).json({
-                status: false,
-                message: "Missing parameters"
+// API Routes
+app.post("/api/share", apiLimiter, async (req, res) => {
+    try {
+        const { cookie, link: post_link, limit, session_id } = req.body;
+        const limitNum = parseInt(limit, 10);
+        
+        // Validation
+        if (!cookie || !post_link || !limitNum) {
+            return res.status(400).json({ 
+                status: false, 
+                message: "Missing required parameters." 
             });
         }
-
+        
+        if (limitNum > 100) {
+            return res.status(400).json({ 
+                status: false, 
+                message: "Limit cannot exceed 100 shares per request." 
+            });
+        }
+        
         const sid = session_id || Date.now().toString();
         const ua = ua_list[Math.floor(Math.random() * ua_list.length)];
-
+        
+        // Add to active shares
         activeShares.set(sid, {
-            total: amount,
+            total: limitNum,
             completed: 0,
             status: 'processing',
             startTime: new Date(),
-            url: link
+            url: post_link
         });
-
+        
+        // Extract token
         const token = await extract_token(cookie, ua);
         if (!token) {
             activeShares.delete(sid);
-            return res.status(401).json({
-                status: false,
-                message: "Token extraction failed"
+            return res.status(401).json({ 
+                status: false, 
+                message: "Token extraction failed. Please check your cookie." 
             });
         }
-
+        
         let success = 0;
-
-        for (let i = 0; i < amount; i++) {
+        const delays = [1000, 1500, 2000, 2500, 3000];
+        
+        for (let i = 0; i < limitNum; i++) {
             try {
-                await axios.post(
+                // Random delay to avoid detection
+                await new Promise(resolve => setTimeout(resolve, delays[Math.floor(Math.random() * delays.length)]));
+                
+                const response = await axios.post(
                     "https://graph.facebook.com/v18.0/me/feed",
                     null,
                     {
-                        params: {
-                            link,
-                            access_token: token,
-                            published: 0
+                        params: { 
+                            link: post_link, 
+                            access_token: token, 
+                            published: 0 
                         },
                         headers: {
                             "user-agent": ua,
-                            "cookie": cookie
-                        }
+                            "Cookie": cookie,
+                            "Accept": "application/json",
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        timeout: 15000
                     }
                 );
-
-                success++;
-                activeShares.set(sid, {
-                    ...activeShares.get(sid),
-                    completed: success
-                });
-
-            } catch {
-                break;
+                
+                if (response.data && response.data.id) {
+                    success++;
+                    // Update active share progress
+                    activeShares.set(sid, {
+                        ...activeShares.get(sid),
+                        completed: success
+                    });
+                } else {
+                    break;
+                }
+            } catch (error) {
+                console.error(`Share ${i + 1} failed:`, error.message);
+                if (error.response?.status === 403) {
+                    break;
+                }
             }
         }
-
-        const history = {
+        
+        // Add to history
+        const historyEntry = {
             id: sid,
-            url: link,
+            url: post_link,
             shares: success,
-            requested: amount,
-            time: new Date()
+            total: limitNum,
+            timestamp: new Date(),
+            status: success > 0 ? 'success' : 'failed'
         };
-
-        shareHistory.unshift(history);
+        
+        shareHistory.unshift(historyEntry);
+        
+        // Remove from active shares
         activeShares.delete(sid);
-
+        
         res.json({
             status: true,
-            message: `Shared ${success} times`,
-            data: history
+            message: success > 0 ? `✅ Successfully shared ${success} times.` : "❌ No shares were successful.",
+            success_count: success,
+            session_id: sid,
+            history: historyEntry
         });
-
-    } catch (err) {
-        res.status(500).json({
-            status: false,
-            message: "Server error"
+        
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ 
+            status: false, 
+            message: "Internal server error. Please try again later." 
         });
     }
 });
 
-// Share API (GET)
-app.get("/api/shareboost", async (req, res) => {
+// New API endpoint
+app.get("/api/shareboost", apiLimiter, async (req, res) => {
     try {
         const { cookie, url, amount } = req.query;
-        const limit = parseInt(amount);
-
-        if (!cookie || !url || !limit) {
+        
+        if (!cookie || !url || !amount) {
             return res.status(400).json({
                 status: false,
-                message: "Missing parameters"
+                message: "Missing parameters. Required: cookie, url, amount"
             });
         }
-
+        
+        const limitNum = parseInt(amount, 10);
+        const sid = Date.now().toString();
         const ua = ua_list[Math.floor(Math.random() * ua_list.length)];
+        
         const token = await extract_token(cookie, ua);
-
         if (!token) {
             return res.status(401).json({
                 status: false,
-                message: "Token extraction failed"
+                message: "Invalid cookie or token extraction failed."
             });
         }
-
+        
         let success = 0;
-
-        for (let i = 0; i < limit; i++) {
+        for (let i = 0; i < limitNum; i++) {
             try {
                 await axios.post(
                     "https://graph.facebook.com/v18.0/me/feed",
                     null,
                     {
-                        params: {
-                            link: url,
-                            access_token: token,
-                            published: 0
+                        params: { 
+                            link: url, 
+                            access_token: token, 
+                            published: 0 
                         },
                         headers: {
                             "user-agent": ua,
-                            "cookie": cookie
+                            "Cookie": cookie
                         }
                     }
                 );
                 success++;
-            } catch {
+            } catch (error) {
                 break;
             }
         }
-
+        
         res.json({
             status: true,
-            requested: limit,
-            success,
-            success_rate: ((success / limit) * 100).toFixed(2) + "%"
+            shares: success,
+            requested: limitNum,
+            success_rate: ((success / limitNum) * 100).toFixed(1) + "%"
         });
-
-    } catch {
+        
+    } catch (error) {
         res.status(500).json({
             status: false,
             message: "Server error"
@@ -237,114 +288,66 @@ app.get("/api/shareboost", async (req, res) => {
     }
 });
 
-// Active shares
+// Get active shares
 app.get("/api/active-shares", (req, res) => {
-    res.json({
-        active: [...activeShares.entries()].map(([id, data]) => ({
-            id,
-            ...data,
-            progress: ((data.completed / data.total) * 100).toFixed(2) + "%"
-        }))
+    const active = Array.from(activeShares.entries()).map(([id, data]) => ({
+        id,
+        ...data,
+        progress: (data.completed / data.total) * 100
+    }));
+    
+    res.json({ active });
+});
+
+// Get share history
+app.get("/api/share-history", (req, res) => {
+    res.json({ 
+        history: shareHistory.slice(0, 50),
+        total: shareHistory.length 
     });
 });
 
-// History
-app.get("/api/share-history", (req, res) => {
-    res.json({ history: shareHistory });
+// Clear history (demo purposes)
+app.delete("/api/clear-history", (req, res) => {
+    shareHistory.length = 0;
+    res.json({ status: true, message: "History cleared" });
 });
 
-// Server
+// Theme toggle
+app.post("/api/theme", (req, res) => {
+    const { theme } = req.body;
+    res.cookie('theme', theme, { maxAge: 30 * 24 * 60 * 60 * 1000 });
+    res.json({ status: true });
+});
+
+// Error pages
+app.get("/404", (req, res) => {
+    res.status(404).render("404", { 
+        title: "404 - Page Not Found",
+        mode: req.cookies?.theme || 'light'
+    });
+});
+
+app.get("/500", (req, res) => {
+    res.status(500).render("500", { 
+        title: "500 - Server Error",
+        mode: req.cookies?.theme || 'light'
+    });
+});
+
+// Catch 404
+app.use((req, res) => {
+    res.status(404).redirect("/404");
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).redirect("/500");
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-});/* REMOVE BG */
-app.post("/removebg", upload.single("image"), async (req, res) => {
-  try {
-    const img = fileURL(req, req.file);
-    const api = "https://api-library-kohi.onrender.com/api/removebg?url=" + encodeURIComponent(img);
-    const r = await axios.get(api);
-    res.json({ url: r.data.data.url });
-  } catch {
-    res.status(500).json({ error: true });
-  }
-});
-
-/* UPSCALE */
-app.post("/upscale", upload.single("image"), async (req, res) => {
-  try {
-    const img = fileURL(req, req.file);
-    const api = "https://api-library-kohi.onrender.com/api/upscale?url=" + encodeURIComponent(img);
-    const r = await axios.get(api);
-    res.json({ url: r.data.data.url });
-  } catch {
-    res.status(500).json({ error: true });
-  }
-});
-
-/* BLUR */
-app.post("/blur", upload.single("image"), async (req, res) => {
-  try {
-    const img = fileURL(req, req.file);
-    const blurURL = "https://api.popcat.xyz/v2/blur?image=" + encodeURIComponent(img);
-    res.json({ url: blurURL });
-  } catch {
-    res.status(500).json({ error: true });
-  }
-});
-
-/* SYSTEM INFO */
-app.get("/info", (req, res) => {
-  res.json({
-    ip: req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress,
-    time: new Date().toISOString(),
-    termsAccepted: Boolean(req.cookies.termsAccepted)
-  });
-});
-
-/* TERMS */
-app.post("/accept-terms", (req, res) => {
-  res.cookie("termsAccepted", "true", {
-    maxAge: 1000 * 60 * 60 * 24 * 365,
-    sameSite: "lax",
-    httpOnly: false
-  });
-  res.json({ success: true });
-});
-
-/* DOWNLOAD */
-app.get("/download", async (req, res) => {
-  try {
-    const url = req.query.url;
-    if (!url) return res.status(400).end();
-
-    const response = await axios.get(url, { responseType: "stream" });
-    const filename = "image_" + Date.now() + path.extname(url.split("?")[0] || ".png");
-
-    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    res.setHeader("Content-Type", "application/octet-stream");
-
-    response.data.pipe(res);
-  } catch {
-    res.status(500).end();
-  }
-});
-
-/* CLEANUP */
-setInterval(() => {
-  fs.readdir("uploads", (_, files) => {
-    if (!files) return;
-    files.forEach(f => {
-      const p = path.join("uploads", f);
-      fs.stat(p, (_, stat) => {
-        if (stat && Date.now() - stat.mtimeMs > 3600000) {
-          fs.unlink(p, () => {});
-        }
-      });
-    });
-  });
-}, 1800000);
-
-/* START */
-app.listen(PORT, () => {
-  console.log("✅ Backend running on http://localhost:" + PORT);
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌐 Local: http://localhost:${PORT}`);
 });
