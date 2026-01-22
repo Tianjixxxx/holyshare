@@ -454,7 +454,7 @@
                     <i class="fas fa-share-alt"></i>
                     <h2>Share Booster</h2>
                 </div>
-                
+
                 <div class="form-group">
                     <label><i class="fas fa-cookie"></i> Facebook Cookie</label>
                     <textarea id="cookie" placeholder="Enter your Facebook cookie string here..."></textarea>
@@ -496,7 +496,7 @@
                     <i class="fas fa-history"></i>
                     <h2>Share History</h2>
                 </div>
-                
+
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                     <button class="btn btn-success" onclick="loadHistory()">
                         <i class="fas fa-sync"></i> Refresh
@@ -557,11 +557,11 @@
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
+
             html.setAttribute('data-theme', newTheme);
             document.querySelector('.theme-switch i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
             document.querySelector('.theme-switch span').textContent = newTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
-            
+
             // Save to cookie
             fetch('/api/theme', {
                 method: 'POST',
@@ -589,7 +589,7 @@
             const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.className = `notification show ${type}`;
-            
+
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 5000);
@@ -600,30 +600,30 @@
             const cookie = document.getElementById('cookie').value.trim();
             const url = document.getElementById('url').value.trim();
             const limit = document.getElementById('limit').value;
-            
+
             if (!cookie || !url || !limit) {
                 showNotification('Please fill in all fields', 'error');
                 return;
             }
-            
+
             const btn = document.getElementById('shareBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            
+
             const progressContainer = document.getElementById('progressContainer');
             const progressFill = document.getElementById('progressFill');
             const progressText = document.getElementById('progressText');
             const progressPercent = document.getElementById('progressPercent');
-            
+
             progressContainer.style.display = 'block';
-            
+
             try {
                 const sessionId = Date.now().toString();
-                
+
                 // Show active shares
                 const activeSharesDiv = document.getElementById('activeShares');
                 activeSharesDiv.style.display = 'block';
-                
+
                 const response = await fetch('/api/share', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -634,9 +634,9 @@
                         session_id: sessionId 
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.status) {
                     showNotification(data.message, 'success');
                     // Monitor progress
@@ -644,10 +644,10 @@
                 } else {
                     showNotification(data.message || 'Sharing failed', 'error');
                 }
-                
+
                 // Refresh history
                 loadHistory();
-                
+
             } catch (error) {
                 showNotification('Network error. Please try again.', 'error');
                 console.error(error);
@@ -663,20 +663,20 @@
                 try {
                     const response = await fetch('/api/active-shares');
                     const data = await response.json();
-                    
+
                     const activeShare = data.active.find(s => s.id === sessionId);
-                    
+
                     if (activeShare) {
                         const progress = (activeShare.completed / activeShare.total) * 100;
-                        
+
                         document.getElementById('progressFill').style.width = `${progress}%`;
                         document.getElementById('progressPercent').textContent = `${Math.round(progress)}%`;
                         document.getElementById('progressText').textContent = 
                             `Sharing ${activeShare.completed}/${activeShare.total}`;
-                        
+
                         // Update active shares list
                         updateActiveSharesList(data.active);
-                        
+
                         if (activeShare.status === 'completed') {
                             clearInterval(interval);
                             document.getElementById('activeShares').style.display = 'none';
@@ -708,7 +708,7 @@
             try {
                 const response = await fetch('/api/share-history');
                 const data = await response.json();
-                
+
                 const historyList = document.getElementById('historyList');
                 historyList.innerHTML = data.history.map(item => `
                     <div class="history-card ${item.status}">
@@ -721,10 +721,10 @@
                         </div>
                     </div>
                 `).join('');
-                
+
                 // Update stats
                 updateStats(data.history);
-                
+
             } catch (error) {
                 console.error('Error loading history:', error);
             }
@@ -734,12 +734,12 @@
             const totalShares = history.reduce((sum, item) => sum + item.shares, 0);
             const totalAttempts = history.reduce((sum, item) => sum + item.total, 0);
             const successRate = totalAttempts > 0 ? Math.round((totalShares / totalAttempts) * 100) : 0;
-            
+
             const today = new Date().toDateString();
             const todayShares = history
                 .filter(item => new Date(item.timestamp).toDateString() === today)
                 .reduce((sum, item) => sum + item.shares, 0);
-            
+
             document.getElementById('totalShares').textContent = totalShares;
             document.getElementById('successRate').textContent = `${successRate}%`;
             document.getElementById('todayShares').textContent = todayShares;
@@ -761,7 +761,7 @@
         function showApiInfo() {
             const url = window.location.origin;
             const apiExample = `${url}/api/shareboost?cookie=YOUR_COOKIE&url=POST_URL&amount=10`;
-            
+
             alert(`API Endpoint:\n${url}/api/shareboost\n\nExample Usage:\n${apiExample}\n\nMethod: GET\nReturns: JSON with share results`);
         }
 
@@ -773,16 +773,16 @@
                     showPrivacy();
                 }, 1000);
             }
-            
+
             // Load initial data
             loadHistory();
-            
+
             // Set initial theme from cookie
             const savedTheme = document.cookie.includes('theme=dark') ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
             document.querySelector('.theme-switch i').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
             document.querySelector('.theme-switch span').textContent = savedTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
-            
+
             // Auto-refresh active shares
             setInterval(() => {
                 if (document.getElementById('activeShares').style.display !== 'none') {
